@@ -274,7 +274,7 @@ function updatePlayer(dt){
   playerGroup.userData.arms[1].rotation.x=Math.sin(walkTime)*.29*gait;
   playerGroup.userData.lowerArms.forEach((a,i)=>{a.rotation.x=Math.max(0,Math.sin(walkTime+(i?Math.PI:0)))*.16*gait;});
   playerGroup.userData.head.rotation.y=Math.sin(walkTime*.45)*.025;
-  playerGroup.position.y+=Math.abs(Math.sin(walkTime*2))*.025*gait;
+  if(playerGroup.userData.torso)playerGroup.userData.torso.position.y=1.48+Math.abs(Math.sin(walkTime*2))*.025*gait;
   if(playerGroup.userData.torso){playerGroup.userData.torso.rotation.z=clamp(-playerGroup.userData.velocity.x*.012,-.07,.07);playerGroup.userData.torso.scale.y=1.08;}
  }else{
   playerGroup.userData.velocity.x=0;playerGroup.userData.velocity.z=0;
