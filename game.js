@@ -173,7 +173,7 @@ function addPlayer(){
  playerGroup.userData.backpack=pack;
  const compassMesh=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,.08,12),makeMaterial(0xd1ae58));compassMesh.position.set(.67,1.8,0);compassMesh.visible=false;playerGroup.add(compassMesh);playerGroup.userData.compass=compassMesh;
  playerGroup.userData.legs=legs;playerGroup.userData.arms=arms;playerGroup.userData.boots=bootMeshes;playerGroup.userData.lowerArms=lowerArms;
- playerGroup.position.set(0,terrainHeight(0,0),0);scene.add(playerGroup);
+ playerGroup.userData.velocity={x:0,z:0};playerGroup.position.set(0,terrainHeight(0,0),0);scene.add(playerGroup);
 }
 function addGuideNPC(){
  const guide=new THREE.Group(),skin=makeMaterial(0x8f6247),jacket=makeMaterial(0x8a633d),cloth=makeMaterial(0x344d4c),dark=makeMaterial(0x252b28);
@@ -214,7 +214,53 @@ function buildSky(){const skyGeo=new THREE.SphereGeometry(260,24,16);const skyMa
 function showToast(message){ui.toast.textContent=message;ui.toast.classList.remove("hidden");toastTimer=2.3;}
 function begin(){started=true;$("inventory-toggle").classList.remove("hidden");ui.intro.classList.add("hidden");ui.hud.classList.remove("hidden");ui.hint.classList.remove("hidden");$("mobile-controls").classList.remove("hidden");startDropSequence();if(innerWidth>760)requestLock();}
 function requestLock(){if(renderer?.domElement?.requestPointerLock&&innerWidth>760)renderer.domElement.requestPointerLock();}
-function updatePlayer(dt){const forward=clamp((keys.has("KeyW")?1:0)-(keys.has("KeyS")?1:0)-stickVector.y,-1,1),side=clamp((keys.has("KeyD")?1:0)-(keys.has("KeyA")?1:0)+stickVector.x,-1,1);const moving=forward!==0||side!==0;const sprinting=keys.has("ShiftLeft")&&playerStats.energy>4;const speed=(sprinting?9.2:5.4)+(equipment.boots?.65:0);const dir=new THREE.Vector3(side,0,-forward);if(moving){dir.normalize().applyAxisAngle(new THREE.Vector3(0,1,0),yaw);playerGroup.position.x+=dir.x*speed*dt;playerGroup.position.z+=dir.z*speed*dt;playerGroup.rotation.y=Math.atan2(-dir.x,-dir.z);walkTime+=dt*speed;playerGroup.userData.legs[0].rotation.x=Math.sin(walkTime)*.62;playerGroup.userData.legs[1].rotation.x=-Math.sin(walkTime)*.62;playerGroup.userData.arms[0].rotation.x=-Math.sin(walkTime)*.34;playerGroup.userData.arms[1].rotation.x=Math.sin(walkTime)*.34;playerGroup.userData.head.rotation.y=Math.sin(walkTime*.45)*.025;}else{playerGroup.userData.legs.forEach(l=>l.rotation.x*=.8);playerGroup.userData.arms.forEach(a=>a.rotation.x*=.8);playerGroup.userData.head.rotation.y=Math.sin(elapsed*1.1)*.035;}if(keys.has("Space")&&onGround){verticalVelocity=8.5;onGround=false;}verticalVelocity-=22*dt;playerGroup.position.y+=verticalVelocity*dt;const floor=terrainHeight(playerGroup.position.x,playerGroup.position.z);if(playerGroup.position.y<=floor){playerGroup.position.y=floor;verticalVelocity=0;onGround=true;}for(const obstacle of colliders){const dx=playerGroup.position.x-obstacle.x,dz=playerGroup.position.z-obstacle.z,d=Math.hypot(dx,dz),min=obstacle.r+.55;if(d<min&&d>.001){playerGroup.position.x=obstacle.x+dx/d*min;playerGroup.position.z=obstacle.z+dz/d*min;}}playerGroup.position.x=clamp(playerGroup.position.x,-WORLD/2+5,WORLD/2-5);playerGroup.position.z=clamp(playerGroup.position.z,-WORLD/2+5,WORLD/2-5);const target=new THREE.Vector3(playerGroup.position.x,playerGroup.position.y+2.25,playerGroup.position.z);const offset=new THREE.Vector3(Math.sin(yaw)*cameraDistance,2.6+pitch*5,Math.cos(yaw)*cameraDistance);camera.position.lerp(target.clone().add(offset),1-Math.pow(.001,dt));camera.lookAt(target);updateSurvival(dt,moving);checkCrystals();updateInteractions();}
+function updatePlayer(dt){
+ const forward=clamp((keys.has("KeyW")?1:0)-(keys.has("KeyS")?1:0)-stickVector.y,-1,1);
+ const side=clamp((keys.has("KeyD")?1:0)-(keys.has("KeyA")?1:0)+stickVector.x,-1,1);
+ const moving=forward!==0||side!==0;
+ const sprinting=moving&&keys.has("ShiftLeft")&&playerStats.energy>4;
+ const maxSpeed=(sprinting?9.2:5.4)+(equipment.boots?.65:0);
+ const input=new THREE.Vector3(side,0,-forward);
+ if(input.lengthSq()>1)input.normalize();
+ input.applyAxisAngle(new THREE.Vector3(0,1,0),yaw);
+ const response=1-Math.exp(-13*dt);
+ playerGroup.userData.velocity.x+=(input.x*maxSpeed-playerGroup.userData.velocity.x)*response;
+ playerGroup.userData.velocity.z+=(input.z*maxSpeed-playerGroup.userData.velocity.z)*response;
+ const actualSpeed=Math.hypot(playerGroup.userData.velocity.x,playerGroup.userData.velocity.z);
+ playerGroup.position.x+=playerGroup.userData.velocity.x*dt;
+ playerGroup.position.z+=playerGroup.userData.velocity.z*dt;
+ if(actualSpeed>.18){
+  const facing=Math.atan2(-playerGroup.userData.velocity.x,-playerGroup.userData.velocity.z);
+  let angleDelta=((facing-playerGroup.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI;
+  playerGroup.rotation.y+=angleDelta*(1-Math.exp(-18*dt));
+  walkTime+=dt*(sprinting?12:8)*Math.min(1,actualSpeed/maxSpeed);
+  const gait=Math.min(1,actualSpeed/maxSpeed);
+  playerGroup.userData.legs[0].rotation.x=Math.sin(walkTime)*.62*gait;
+  playerGroup.userData.legs[1].rotation.x=-Math.sin(walkTime)*.62*gait;
+  playerGroup.userData.arms[0].rotation.x=-Math.sin(walkTime)*.34*gait;
+  playerGroup.userData.arms[1].rotation.x=Math.sin(walkTime)*.34*gait;
+  playerGroup.userData.head.rotation.y=Math.sin(walkTime*.45)*.025;
+ }else{
+  playerGroup.userData.velocity.x=0;playerGroup.userData.velocity.z=0;
+  playerGroup.userData.legs.forEach(l=>l.rotation.x*=Math.exp(-12*dt));
+  playerGroup.userData.arms.forEach(a=>a.rotation.x*=Math.exp(-12*dt));
+  playerGroup.userData.head.rotation.y=Math.sin(elapsed*1.1)*.025;
+ }
+ if(keys.has("Space")&&onGround){verticalVelocity=8.5;onGround=false;}
+ verticalVelocity-=22*dt;playerGroup.position.y+=verticalVelocity*dt;
+ const floor=terrainHeight(playerGroup.position.x,playerGroup.position.z);
+ if(playerGroup.position.y<=floor){playerGroup.position.y=floor;verticalVelocity=0;onGround=true;}
+ for(const obstacle of colliders){
+  const dx=playerGroup.position.x-obstacle.x,dz=playerGroup.position.z-obstacle.z,d=Math.hypot(dx,dz),min=obstacle.r+.55;
+  if(d<min&&d>.001){playerGroup.position.x=obstacle.x+dx/d*min;playerGroup.position.z=obstacle.z+dz/d*min;playerGroup.userData.velocity.x=0;playerGroup.userData.velocity.z=0;}
+ }
+ playerGroup.position.x=clamp(playerGroup.position.x,-WORLD/2+5,WORLD/2-5);
+ playerGroup.position.z=clamp(playerGroup.position.z,-WORLD/2+5,WORLD/2-5);
+ const target=new THREE.Vector3(playerGroup.position.x,playerGroup.position.y+2.25,playerGroup.position.z);
+ const offset=new THREE.Vector3(Math.sin(yaw)*cameraDistance,2.6+pitch*5,Math.cos(yaw)*cameraDistance);
+ camera.position.lerp(target.clone().add(offset),1-Math.pow(.001,dt));camera.lookAt(target);
+ updateSurvival(dt,actualSpeed>.25);checkCrystals();updateInteractions();
+}
 function updateSurvival(dt,moving){
  const outside=Math.hypot(playerGroup.position.x,playerGroup.position.z)>SAFE_ZONE_RADIUS;
  if(outside!==outsideSafeZone){outsideSafeZone=outside;showToast(outside?"ATENÇÃO • ESTÁS FORA DA ZONA SEGURA":"REGRESSASTE À ZONA SEGURA");}
