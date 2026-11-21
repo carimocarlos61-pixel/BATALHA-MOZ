@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: batalha-moz
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: .
+    autoDeploy: true
