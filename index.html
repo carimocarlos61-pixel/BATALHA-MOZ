@@ -13,6 +13,30 @@
   <script type="importmap">
     {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
   </script>
+  <script>
+  (() => {
+    const showBootError = (message) => {
+      const loading = document.getElementById("loading");
+      const panel = document.getElementById("error-panel");
+      const detail = document.getElementById("error-detail");
+      if (loading) loading.classList.add("hidden");
+      if (detail) detail.textContent = message;
+      if (panel) panel.classList.remove("hidden");
+    };
+    window.__BATALHA_SHOW_ERROR = showBootError;
+    window.addEventListener("error", (event) => {
+      if (!window.__BATALHA_READY) showBootError("Falha ao carregar o jogo: " + (event.message || "erro de módulo ou recurso externo") + ". Verifica a ligação e recarrega.");
+    });
+    window.addEventListener("unhandledrejection", (event) => {
+      if (!window.__BATALHA_READY) showBootError("Não foi possível carregar o motor 3D. " + String(event.reason || "Falha de ligação") + ". Recarrega a página.");
+    });
+    setTimeout(() => {
+      if (!window.__BATALHA_READY && document.getElementById("loading") && !document.getElementById("loading").classList.contains("hidden")) {
+        showBootError("O motor 3D demorou demasiado a responder. Verifica a internet, desativa bloqueadores para esta página e tenta novamente.");
+      }
+    }, 25000);
+  })();
+  </script>
   <script type="module" src="./game.js"></script>
 </head>
 <body>
@@ -45,8 +69,8 @@
     <div class="toast hidden" id="toast"></div>
     <div class="center-message hidden" id="win-message"><div class="win-icon">✦</div><p class="eyebrow">MISSÃO CONCLUÍDA</p><h2>EXPLORADOR<br><span>DA ILHA.</span></h2><p>Encontraste todos os cristais. A aventura continua.</p><button id="continue-btn" class="primary-btn">CONTINUAR A EXPLORAR →</button></div>
     <div class="bottom-hint hidden" id="bottom-hint">W A S D <span>MOVER</span> &nbsp; E <span>INTERAGIR</span> &nbsp; I <span>MOCHILA</span> &nbsp; SPACE <span>SALTAR</span></div>
-    <div class="loading" id="loading"><div class="loader-mark">B</div><strong>BATALHA<span>-MOZ</span></strong><div class="loading-track"><i></i></div><small>A PREPARAR A ILHA...</small></div>
-    <div class="error-panel hidden" id="error-panel">Não foi possível iniciar o mundo 3D. Verifica a ligação à internet e recarrega a página.</div>
+    <div class="loading" id="loading"><div class="loader-mark">B</div><strong>BATALHA<span>-MOZ</span></strong><div class="loading-track"><i></i></div><small>A CARREGAR O MOTOR 3D E A CONSTRUIR A ILHA...</small></div>
+    <div class="error-panel hidden" id="error-panel" role="alert"><strong>NÃO FOI POSSÍVEL ABRIR O JOGO</strong><p id="error-detail">Verifica a ligação à internet e tenta novamente.</p><button id="reload-btn" class="primary-btn" type="button">RECARREGAR JOGO ↻</button></div>
   </main>
 </body>
 </html>
