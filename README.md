@@ -40,3 +40,14 @@ O repositório está configurado como Render Static Site com publicação autom�
 - Equipamento de mochila, bússola e botas com alterações visuais e efeitos no jogo.
 - Interação com portas das casas usando E.
 - Abrir/fechar inventário com I ou pelo botão MOCHILA.
+
+
+## Módulo de sobrevivência e zona segura
+- Indicadores visuais de vitalidade e energia no HUD.
+- Zona segura circular visível no terreno.
+- Fora da zona segura, a energia diminui gradualmente e o HUD avisa o explorador.
+- Correr consome energia; permanecer na zona segura sem correr permite recuperá-la.
+- A missão termina quando os cinco cristais são recolhidos.
+
+## Nota de escopo
+Este protótipo é uma experiência single-player de exploração e sobrevivência não violenta. Não implementa combate, armas, adversários de combate, matchmaking ou multiplayer.
