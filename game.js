@@ -94,17 +94,17 @@ function interact(){if(inventoryOpen||!nearestInteractable)return;const target=n
 function addCrystals(){const positions=[[-13,-9],[18,-15],[-29,24],[34,30],[4,48]];positions.forEach((p,i)=>{const g=new THREE.Group();const gem=new THREE.Mesh(new THREE.OctahedronGeometry(1.05,0),new THREE.MeshStandardMaterial({color:0x66f2d0,emissive:0x13a98d,emissiveIntensity:1.5,metalness:.25,roughness:.2}));gem.position.y=1.8;gem.castShadow=true;g.add(gem);const ring=new THREE.Mesh(new THREE.TorusGeometry(1.35,.045,8,32),new THREE.MeshBasicMaterial({color:0xc0fff0}));ring.rotation.x=Math.PI/2;ring.position.y=1.3;g.add(ring);g.position.set(p[0],terrainHeight(p[0],p[1]),p[1]);g.userData={gem,ring,index:i};scene.add(g);crystals.push(g);});}
 function addPlayer(){
  playerGroup=new THREE.Group();
- const skin=makeMaterial(0x986443),shirt=makeMaterial(0x243e45),pants=makeMaterial(0x25313a),boots=makeMaterial(0x161d20),vest=makeMaterial(0x9b7138),fabric=makeMaterial(0x344a43);
+ const skin=makeMaterial(0x986443),shirt=makeMaterial(0x243e45),pants=makeMaterial(0x25313a),bootMaterial=makeMaterial(0x161d20),vest=makeMaterial(0x9b7138),fabric=makeMaterial(0x344a43);
  const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.48,.9,5,10),shirt);torso.position.y=1.55;torso.castShadow=true;playerGroup.add(torso);
  const vestFront=new THREE.Mesh(new THREE.BoxGeometry(.72,.72,.16),vest);vestFront.position.set(0,1.58,-.39);playerGroup.add(vestFront);
  const head=new THREE.Mesh(new THREE.SphereGeometry(.34,18,14),skin);head.position.y=2.42;head.castShadow=true;playerGroup.add(head);
  const hair=new THREE.Mesh(new THREE.SphereGeometry(.35,16,8,0,Math.PI*2,0,Math.PI*.48),makeMaterial(0x20272a));hair.position.y=2.55;playerGroup.add(hair);
  const helmet=new THREE.Mesh(new THREE.SphereGeometry(.39,16,10,0,Math.PI*2,0,Math.PI*.53),fabric);helmet.position.y=2.62;playerGroup.add(helmet);
- const legs=[],arms=[],boots=[];
- for(const x of [-.22,.22]){const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.18,.62,5,8),pants);leg.position.set(x,.62,0);leg.castShadow=true;playerGroup.add(leg);legs.push(leg);const boot=new THREE.Mesh(new THREE.BoxGeometry(.32,.17,.5),boots);boot.position.set(x,.16,-.1);playerGroup.add(boot);boots.push(boot);}
- for(const x of [-.58,.58]){const arm=new THREE.Group();const upper=new THREE.Mesh(new THREE.CapsuleGeometry(.14,.52,4,7),shirt);upper.position.y=-.28;upper.castShadow=true;arm.add(upper);const glove=new THREE.Mesh(new THREE.SphereGeometry(.16,10,8),boots);glove.position.y=-.63;arm.add(glove);arm.position.set(x,1.95,0);playerGroup.add(arm);arms.push(arm);}
+ const legs=[],arms=[],bootMeshes=[];
+ for(const x of [-.22,.22]){const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.18,.62,5,8),pants);leg.position.set(x,.62,0);leg.castShadow=true;playerGroup.add(leg);legs.push(leg);const boot=new THREE.Mesh(new THREE.BoxGeometry(.32,.17,.5),bootMaterial);boot.position.set(x,.16,-.1);playerGroup.add(boot);bootMeshes.push(boot);}
+ for(const x of [-.58,.58]){const arm=new THREE.Group();const upper=new THREE.Mesh(new THREE.CapsuleGeometry(.14,.52,4,7),shirt);upper.position.y=-.28;upper.castShadow=true;arm.add(upper);const glove=new THREE.Mesh(new THREE.SphereGeometry(.16,10,8),bootMaterial);glove.position.y=-.63;arm.add(glove);arm.position.set(x,1.95,0);playerGroup.add(arm);arms.push(arm);}
  const pack=new THREE.Mesh(new THREE.BoxGeometry(.62,.68,.25),vest);pack.position.set(0,1.55,.48);playerGroup.add(pack);playerGroup.userData.backpack=pack;const compassMesh=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,.08,12),makeMaterial(0xd1ae58));compassMesh.position.set(.67,1.8,0);compassMesh.visible=false;playerGroup.add(compassMesh);playerGroup.userData.compass=compassMesh;
- playerGroup.userData.legs=legs;playerGroup.userData.arms=arms;playerGroup.userData.boots=boots;playerGroup.position.set(0,terrainHeight(0,0),0);scene.add(playerGroup);
+ playerGroup.userData.legs=legs;playerGroup.userData.arms=arms;playerGroup.userData.boots=bootMeshes;playerGroup.position.set(0,terrainHeight(0,0),0);scene.add(playerGroup);
 }
 function addPlane(){
  plane=new THREE.Group();
