@@ -293,8 +293,8 @@ function checkCrystals(){for(const c of crystals){if(c.userData.collected)contin
 function setupTouchControls(){const zone=$("stick-zone"),knob=$("stick-knob");if(!zone)return;const move=e=>{const r=zone.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),max=39,len=Math.hypot(dx,dy),scale=len>max?max/len:1;stickVector={x:dx*scale/max,y:dy*scale/max};knob.style.transform="translate("+stickVector.x*39+"px,"+stickVector.y*39+"px)";};zone.addEventListener("pointerdown",e=>{stickPointer=e.pointerId;zone.setPointerCapture(e.pointerId);move(e);});zone.addEventListener("pointermove",e=>{if(e.pointerId===stickPointer)move(e);});const reset=()=>{stickPointer=null;stickVector={x:0,y:0};knob.style.transform="translate(0,0)";};zone.addEventListener("pointerup",reset);zone.addEventListener("pointercancel",reset);$("jump-touch").addEventListener("pointerdown",e=>{e.preventDefault();if(onGround)keys.add("Space");});$("jump-touch").addEventListener("pointerup",()=>keys.delete("Space"));$("jump-touch").addEventListener("pointercancel",()=>keys.delete("Space"));}
 function updateEnvironment(dt){
  elapsed+=dt;dayTime=(8.5+elapsed*.018)%24;
- const h=dayTime,night=h<6||h>19,daylight=night?.24:clamp(1-Math.abs(h-13)/12,.35,1);
- const skyColor=new THREE.Color().setHSL(.54,.28,night?.13:.58*daylight);
+ const h=dayTime,night=h<6||h>19,daylight=night ? 0.24 : clamp(1-Math.abs(h-13)/12,.35,1);
+ const skyColor=new THREE.Color().setHSL(.54,.28,night ? 0.13 : 0.58*daylight);
  scene.background.copy(skyColor);scene.fog.color.copy(skyColor);
  scene.userData.sun.intensity=.45+2.7*daylight;scene.userData.hemi.intensity=.55+1.45*daylight;
  $("clock-label").textContent=String(Math.floor(h)).padStart(2,"0")+":"+String(Math.floor((h%1)*60)).padStart(2,"0");
