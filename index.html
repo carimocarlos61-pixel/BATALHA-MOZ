@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1720">
+  <meta name="description" content="BATALHA-MOZ — protótipo 3D de exploração e sobrevivência.">
+  <title>BATALHA-MOZ | Arena de Sobrevivência</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+  <script type="importmap">
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
+  </script>
+  <script type="module" src="./game.js"></script>
+</head>
+<body>
+  <main id="game-shell">
+    <div id="scene" aria-label="Mundo 3D BATALHA-MOZ"></div>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="BATALHA-MOZ início"><span class="brand-mark">B</span><span>BATALHA<span class="brand-accent">-MOZ</span><small>ARENA DE SOBREVIVÊNCIA</small></span></a>
+      <div class="top-status"><span class="live-dot"></span> MODO EXPLORAÇÃO <span class="status-divider">|</span><span id="weather-label">TEMPO LIMPO</span></div>
+      <button id="sound-btn" class="icon-button" aria-label="Alternar som" title="Som">♫</button>
+    </header>
+
+    <section class="intro-panel" id="intro-panel">
+      <p class="eyebrow">MOÇAMBIQUE • TEMPORADA ZERO</p>
+      <h1>ENTRA NA<br><span>ARENA.</span></h1>
+      <p class="intro-copy">Explora uma ilha selvagem, descobre os seus pontos secretos e recolhe os cristais de energia.</p>
+      <button id="start-btn" class="primary-btn">ENTRAR NO MUNDO <span>→</span></button>
+      <div class="controls-note">W A S D <i>mover</i> &nbsp; • &nbsp; RATO <i>olhar</i> &nbsp; • &nbsp; ESPAÇO <i>saltar</i></div>
+    </section>
+
+    <section class="hud hidden" id="hud">
+      <div class="hud-card objective-card"><span class="hud-label">MISSÃO</span><strong>RECOLHE OS CRISTAIS</strong><div class="progress-track"><span id="progress-fill"></span></div><small><b id="crystal-count">0</b> / 5 CRISTAIS</small></div>
+      <div class="hud-card location-card"><span class="hud-label">LOCALIZAÇÃO</span><strong id="location-name">PLANÍCIE CENTRAL</strong><small>ILHA DE BATALHA • MOZ</small></div>
+      <div class="hud-card time-card"><span class="hud-label">AMBIENTE</span><strong id="clock-label">08:30</strong><small id="weather-detail">VENTO SUAVE</small></div>
+    </section>
+
+    <div class="crosshair hidden" id="crosshair"><span></span><span></span></div>
+    <div class="toast hidden" id="toast"></div>
+    <div class="center-message hidden" id="win-message"><div class="win-icon">✦</div><p class="eyebrow">MISSÃO CONCLUÍDA</p><h2>EXPLORADOR<br><span>DA ILHA.</span></h2><p>Encontraste todos os cristais. A aventura continua.</p><button id="continue-btn" class="primary-btn">CONTINUAR A EXPLORAR →</button></div>
+    <div class="bottom-hint hidden" id="bottom-hint">W A S D <span>MOVER</span> &nbsp; SPACE <span>SALTAR</span> &nbsp; ESC <span>LIBERTAR RATO</span></div>
+    <div class="loading" id="loading"><div class="loader-mark">B</div><strong>BATALHA<span>-MOZ</span></strong><div class="loading-track"><i></i></div><small>A PREPARAR A ILHA...</small></div>
+    <div class="error-panel hidden" id="error-panel">Não foi possível iniciar o mundo 3D. Verifica a ligação à internet e recarrega a página.</div>
+  </main>
+</body>
+</html>
