@@ -42,11 +42,23 @@ function buildWorld(){
  const colors=[];for(let i=0;i<pos.count;i++){const h=pos.getY(i),n=(seeded(i+17)-.5)*.055;const c=new THREE.Color(h>5?0x6f766c:h>1?0x637e4d:0x547b48);c.offsetHSL(0,n,n);colors.push(c.r,c.g,c.b);}groundGeo.setAttribute("color",new THREE.Float32BufferAttribute(colors,3));const ground=new THREE.Mesh(groundGeo,new THREE.MeshStandardMaterial({color:0xffffff,roughness:1,vertexColors:true}));ground.receiveShadow=true;scene.add(ground);terrain=ground;
  const shore=new THREE.Mesh(new THREE.PlaneGeometry(600,600),makeMaterial(0x315e68));shore.rotation.x=-Math.PI/2;shore.position.y=-8;scene.add(shore);
  const safeRing=new THREE.Mesh(new THREE.TorusGeometry(SAFE_ZONE_RADIUS,.22,8,180),new THREE.MeshStandardMaterial({color:0x70e8c5,emissive:0x1b8e70,emissiveIntensity:1.15,transparent:true,opacity:.82}));safeRing.rotation.x=-Math.PI/2;safeRing.position.y=1.05;safeRing.receiveShadow=false;scene.add(safeRing);
- addMountainRing();addForest();addRocks();addClouds();addBuildings();addCrystals();addPlayer();addGuideNPC();addLootObjects();addPlane();buildSky();
+ addMountainRing();addForest();addPalmGroves();addRocks();addClouds();addBuildings();addCrystals();addPlayer();addGuideNPC();addLootObjects();addPlane();buildSky();
 }
 function addMountainRing(){const mat=makeMaterial(0x596b68);for(let i=0;i<22;i++){const a=i/22*Math.PI*2,r=105+seeded(i)*12,h=18+seeded(i+50)*24;const m=new THREE.Mesh(new THREE.ConeGeometry(12+seeded(i+80)*9,h,7),mat);m.position.set(Math.cos(a)*r,h/2-2,Math.sin(a)*r);m.rotation.y=seeded(i+4)*Math.PI;m.castShadow=true;scene.add(m);}}
 function addTree(x,z,s=1){const y=terrainHeight(x,z),g=new THREE.Group();const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.22*s,.38*s,3.2*s,7),makeMaterial(0x59412d));trunk.position.y=1.6*s;trunk.castShadow=true;g.add(trunk);for(let j=0;j<3;j++){const crown=new THREE.Mesh(new THREE.ConeGeometry((2.1-j*.27)*s,3.2*s,8),makeMaterial(j===0?0x315c3d:0x3e7048));crown.position.y=(3+j*1.25)*s;crown.castShadow=true;g.add(crown);}g.position.set(x,y,z);scene.add(g);colliders.push({x,z,r:1.0*s});}
 function addForest(){for(let i=0;i<245;i++){const a=seeded(i+10)*Math.PI*2,r=12+seeded(i+200)*78,x=Math.cos(a)*r,z=Math.sin(a)*r;if(Math.hypot(x,z)<11)continue;addTree(x,z,.72+seeded(i+400)*.8);}}
+function addPalmGroves(){
+ const trunkMat=makeMaterial(0x76583a),leafMats=[makeMaterial(0x2e6847),makeMaterial(0x397b4d),makeMaterial(0x4a8950)];
+ for(let i=0;i<22;i++){
+  const a=seeded(i+1500)*Math.PI*2,r=58+seeded(i+1600)*19,x=Math.cos(a)*r,z=Math.sin(a)*r,s=.78+seeded(i+1700)*.55,y=terrainHeight(x,z),palm=new THREE.Group();
+  let last=new THREE.Vector3(0,0,0);
+  for(let j=0;j<5;j++){const next=new THREE.Vector3(Math.sin(j*.12)*.22*s,(j+1)*.82*s,Math.cos(j*.12)*.12*s);const delta=next.clone().sub(last),seg=new THREE.Mesh(new THREE.CylinderGeometry(.16*s-j*.012*s,.22*s-j*.012*s,delta.length(),7),trunkMat);seg.position.copy(last).add(next).multiplyScalar(.5);seg.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.clone().normalize());seg.castShadow=true;palm.add(seg);last=next;}
+  const crownY=4.05*s;
+  for(let j=0;j<8;j++){const angle=j/8*Math.PI*2,leaf=new THREE.Mesh(new THREE.ConeGeometry(.24*s,4.2*s,5),leafMats[j%3]);leaf.position.set(Math.cos(angle)*1.55*s,crownY-.42*s,Math.sin(angle)*1.55*s);leaf.rotation.z=Math.cos(angle)*.85;leaf.rotation.x=-Math.sin(angle)*.85;leaf.rotation.y=angle;leaf.castShadow=true;palm.add(leaf);}
+  const coconuts=new THREE.Mesh(new THREE.SphereGeometry(.22*s,8,7),makeMaterial(0x76522d));coconuts.position.set(0,crownY-.25*s,0);palm.add(coconuts);
+  palm.position.set(x,y,z);scene.add(palm);
+ }
+}
 function addRocks(){for(let i=0;i<48;i++){const a=seeded(i+600)*Math.PI*2,r=9+seeded(i+700)*76,x=Math.cos(a)*r,z=Math.sin(a)*r,s=.6+seeded(i+800)*1.7;const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(s,1),makeMaterial(0x777d76));rock.position.set(x,terrainHeight(x,z)+s*.55,z);rock.scale.y=.7;rock.rotation.set(seeded(i)*2,seeded(i+1)*3,seeded(i+2));rock.castShadow=true;rock.receiveShadow=true;scene.add(rock);}}
 function addClouds(){const cloudMat=new THREE.MeshStandardMaterial({color:0xf3f5ee,roughness:1,transparent:true,opacity:.83});for(let i=0;i<18;i++){const cloud=new THREE.Group();for(let j=0;j<5;j++){const puff=new THREE.Mesh(new THREE.SphereGeometry(2.5+seeded(i*8+j)*2,10,8),cloudMat);puff.position.set(j*2.7,seeded(j+i)*1.4,seeded(j+30)*2);cloud.add(puff);}cloud.position.set((seeded(i+900)-.5)*210,28+seeded(i+1000)*17,(seeded(i+1100)-.5)*180);cloud.userData.speed=.25+seeded(i+1200)*.35;scene.add(cloud);}}
 function addBuildings(){
