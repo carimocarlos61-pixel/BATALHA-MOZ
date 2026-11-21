@@ -133,6 +133,10 @@ function addPlayer(){
  for(const x of [-1,1]){const pad=new THREE.Mesh(new THREE.SphereGeometry(.23,12,10),fabric);pad.position.set(x*.43,1.82,0);pad.scale.set(1,.72,1.05);playerGroup.add(pad);shoulderPads.push(pad);}
  const belt=new THREE.Mesh(new THREE.CylinderGeometry(.34,.34,.13,16),leather);belt.position.y=1.03;belt.scale.z=.78;playerGroup.add(belt);
  const buckle=new THREE.Mesh(new THREE.BoxGeometry(.16,.13,.045),metal);buckle.position.set(0,1.03,-.28);playerGroup.add(buckle);
+ const chestStrap=new THREE.Mesh(new THREE.BoxGeometry(.11,.83,.075),leather);chestStrap.position.set(.2,1.57,-.39);chestStrap.rotation.z=-.24;playerGroup.add(chestStrap);
+ const chestStrap2=new THREE.Mesh(new THREE.BoxGeometry(.11,.83,.075),leather);chestStrap2.position.set(-.2,1.57,-.39);chestStrap2.rotation.z=.24;playerGroup.add(chestStrap2);
+ for(const x of [-.2,.2]){const pocket=new THREE.Mesh(new THREE.BoxGeometry(.2,.22,.09),fabric);pocket.position.set(x,1.36,-.39);playerGroup.add(pocket);const flap=new THREE.Mesh(new THREE.BoxGeometry(.22,.055,.1),leather);flap.position.set(x,1.49,-.4);playerGroup.add(flap);}
+ const sidePouch=new THREE.Mesh(new THREE.BoxGeometry(.2,.28,.18),leather);sidePouch.position.set(.37,1.02,-.04);playerGroup.add(sidePouch);
  const headGroup=new THREE.Group();
  const head=new THREE.Mesh(new THREE.SphereGeometry(.285,20,16),skin);head.scale.set(.92,1.12,.9);head.position.y=2.38;head.castShadow=true;headGroup.add(head);
  const earGeo=new THREE.SphereGeometry(.075,10,8);
@@ -148,7 +152,7 @@ function addPlayer(){
  for(const side of [-1,1]){
   const hip=new THREE.Group();hip.position.set(side*.2,1.02,0);playerGroup.add(hip);
   const thigh=new THREE.Mesh(new THREE.CapsuleGeometry(.145,.42,6,9),pants);thigh.position.y=-.29;thigh.castShadow=true;hip.add(thigh);
-  const knee=new THREE.Mesh(new THREE.SphereGeometry(.145,10,8),shirtDark);knee.position.y=-.55;hip.add(knee);
+  const knee=new THREE.Mesh(new THREE.SphereGeometry(.145,10,8),shirtDark);knee.position.y=-.55;hip.add(knee);const kneePad=new THREE.Mesh(new THREE.BoxGeometry(.23,.18,.075),fabric);kneePad.position.set(0,-.55,-.12);hip.add(kneePad);
   const shin=new THREE.Mesh(new THREE.CapsuleGeometry(.12,.37,5,8),pants);shin.position.y=-.79;shin.castShadow=true;hip.add(shin);
   const boot=new THREE.Group();boot.position.set(0,-1.02,-.08);hip.add(boot);
   const bootBody=new THREE.Mesh(new THREE.BoxGeometry(.28,.2,.43),bootMaterial);bootBody.position.set(0,.04,-.06);boot.add(bootBody);
