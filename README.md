@@ -1,16 +1,15 @@
 # BATALHA-MOZ
 
-Protótipo 3D single-player de exploração e combate arcade em navegador, passado numa ilha inspirada em Moçambique.
+Protótipo 3D single-player de exploração numa ilha inspirada em Moçambique.
 
-## Sistemas já implementados
+## Sistemas implementados
 - Ilha 3D procedural com terreno ondulado, montanhas, floresta, rochas e nuvens.
 - Ciclo de iluminação e horário.
-- Casas com paredes, telhados, portas, janelas e pequenos caminhos.
-- Personagem 3D original, câmara em terceira pessoa, corrida e salto.
-- Controlos de teclado e rato no computador.
-- Joystick táctil, câmara por arrasto no lado direito, salto e disparo no telemóvel.
-- Projécteis de energia fictícios para treino arcade.
-- Seis alvos robóticos com pontos de resistência e contagem de alvos desativados.
+- Casas, telhados, portas, janelas e caminhos.
+- Personagem 3D original com movimento, corrida e salto.
+- Sequência cinematográfica de sobrevoo de aeronave e descida com paraquedas dentro do jogo.
+- Ecrã inicial e ecrã de carregamento.
+- Controlos de teclado, rato e joystick táctil.
 - Cinco cristais colecionáveis e interface de missão.
 
 ## Executar localmente
@@ -23,18 +22,11 @@ Abre http://localhost:8000.
 O repositório está configurado como Render Static Site com publicação automática a partir da branch `main`. O Three.js é carregado por CDN, pelo que o navegador precisa de ligação à internet.
 
 ## Controlos
-### Computador
 - WASD: mover.
 - Shift: correr.
 - Espaço: saltar.
-- Rato: olhar.
-- Clique esquerdo: disparar energia.
+- Rato: olhar no computador.
+- Joystick esquerdo e arrasto no lado direito no telemóvel.
 
-### Telemóvel
-- Joystick esquerdo: mover.
-- Arrastar o lado direito do ecrã: olhar.
-- Botão Saltar.
-- Botão Disparar.
-
-## Estado e limitações
-Esta é uma versão de protótipo jogável, não um jogo comercial completo. O combate é arcade e usa energia fictícia e alvos robóticos. Ainda não inclui multiplayer online, contas, matchmaking, mapa de batalha em larga escala, personagens com animações profissionais, inventário de equipamento, sistema de lobby completo, veículos ou servidor de jogo. A aparência e desempenho variam com o dispositivo.
+## Limitações atuais
+É um protótipo de exploração single-player, não um jogo comercial completo. Ainda não inclui multiplayer online, matchmaking, servidor dedicado, modelos humanos externos com animação profissional, mapa de grande escala, interiores completos, veículos dirigíveis ou sistema de lobby completo. A sequência de avião e paraquedas é uma animação de jogo, não uma simulação física real.
