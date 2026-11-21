@@ -2,7 +2,7 @@ name: BATALHA-MOZ quality checks
 
 on:
   push:
-    branches: [main]
+    branches: [main, development-two-hour-build]
   pull_request:
     branches: [main]
 
