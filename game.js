@@ -143,7 +143,10 @@ function addPlayer(){
  const skin=makeMaterial(0x9b6948,.86),skinLight=makeMaterial(0xb77e59,.9),shirt=makeMaterial(0x344b48,.94),shirtDark=makeMaterial(0x223632,.98),pants=makeMaterial(0x343d3b,.98),bootMaterial=makeMaterial(0x171d1b,.9),leather=makeMaterial(0x765238,.9),fabric=makeMaterial(0x46534a,.95),metal=makeMaterial(0x68716c,.55);
  const pelvis=new THREE.Mesh(new THREE.CapsuleGeometry(.29,.22,5,10),pants);pelvis.position.y=1.02;pelvis.scale.set(1.08,.8,.88);pelvis.castShadow=true;playerGroup.add(pelvis);
  const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.39,.72,7,12),shirt);torso.position.y=1.48;torso.scale.set(1.08,1.08,.82);torso.castShadow=true;playerGroup.add(torso);playerGroup.userData.torso=torso;
- const chest=new THREE.Mesh(new THREE.BoxGeometry(.68,.48,.13),shirtDark);chest.position.set(0,1.62,-.31);chest.castShadow=true;playerGroup.add(chest);
+ const chest=new THREE.Mesh(new THREE.SphereGeometry(.39,18,14),shirtDark);chest.position.set(0,1.57,-.245);chest.scale.set(1,.82,.43);chest.castShadow=true;playerGroup.add(chest);
+ const vestPanel=new THREE.Mesh(new THREE.BoxGeometry(.49,.57,.075),fabric);vestPanel.position.set(0,1.54,-.415);vestPanel.castShadow=true;playerGroup.add(vestPanel);
+ for(const x of [-1,1]){const seam=new THREE.Mesh(new THREE.BoxGeometry(.018,.53,.012),leather);seam.position.set(x*.235,1.55,-.46);playerGroup.add(seam);const pouch=new THREE.Mesh(new THREE.BoxGeometry(.17,.19,.095),shirtDark);pouch.position.set(x*.145,1.31,-.47);playerGroup.add(pouch);const pouchFlap=new THREE.Mesh(new THREE.BoxGeometry(.18,.045,.105),leather);pouchFlap.position.set(x*.145,1.42,-.475);playerGroup.add(pouchFlap);}
+ const shoulderSeams=[];for(const x of [-1,1]){const seam=new THREE.Mesh(new THREE.SphereGeometry(.19,12,10),shirtDark);seam.position.set(x*.46,1.78,-.015);seam.scale.set(1,.72,1.15);playerGroup.add(seam);shoulderSeams.push(seam);}
  const collar=new THREE.Mesh(new THREE.CylinderGeometry(.19,.23,.16,12),leather);collar.position.y=1.98;playerGroup.add(collar);
  const neck=new THREE.Mesh(new THREE.CylinderGeometry(.13,.16,.22,12),skin);neck.position.y=2.03;playerGroup.add(neck);
  const shoulderPads=[];
@@ -155,17 +158,24 @@ function addPlayer(){
  for(const x of [-.2,.2]){const pocket=new THREE.Mesh(new THREE.BoxGeometry(.2,.22,.09),fabric);pocket.position.set(x,1.36,-.39);playerGroup.add(pocket);const flap=new THREE.Mesh(new THREE.BoxGeometry(.22,.055,.1),leather);flap.position.set(x,1.49,-.4);playerGroup.add(flap);}
  const sidePouch=new THREE.Mesh(new THREE.BoxGeometry(.2,.28,.18),leather);sidePouch.position.set(.37,1.02,-.04);playerGroup.add(sidePouch);const radio=new THREE.Mesh(new THREE.BoxGeometry(.16,.25,.1),metal);radio.position.set(-.39,1.72,.12);playerGroup.add(radio);const radioAntenna=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.24,5),makeMaterial(0x202b2b));radioAntenna.position.set(-.39,1.96,.12);playerGroup.add(radioAntenna);const shoulderBadge=new THREE.Mesh(new THREE.BoxGeometry(.2,.16,.045),makeMaterial(0xc7ad6b));shoulderBadge.position.set(.43,1.83,-.12);playerGroup.add(shoulderBadge);
  const headGroup=new THREE.Group();
- const head=new THREE.Mesh(new THREE.SphereGeometry(.285,20,16),skin);head.scale.set(.92,1.12,.9);head.position.y=2.38;head.castShadow=true;headGroup.add(head);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.285,32,24),skin);head.scale.set(.92,1.12,.9);head.position.y=2.38;head.castShadow=true;headGroup.add(head);
+ const jaw=new THREE.Mesh(new THREE.SphereGeometry(.205,20,14),skin);jaw.position.set(0,2.245,-.035);jaw.scale.set(.93,.62,.86);headGroup.add(jaw);
  const earGeo=new THREE.SphereGeometry(.075,10,8);
  for(const x of [-1,1]){const ear=new THREE.Mesh(earGeo,skinLight);ear.position.set(x*.275,2.39,0);headGroup.add(ear);}
- const nose=new THREE.Mesh(new THREE.SphereGeometry(.055,10,8),skinLight);nose.scale.set(.7,1,.8);nose.position.set(0,2.34,-.265);headGroup.add(nose);
- const eyeWhite=makeMaterial(0xe7dfce),eyeDark=makeMaterial(0x211e1a);
- for(const x of [-1,1]){const eye=new THREE.Mesh(new THREE.SphereGeometry(.035,10,8),eyeWhite);eye.position.set(x*.105,2.43,-.245);headGroup.add(eye);const pupil=new THREE.Mesh(new THREE.SphereGeometry(.018,8,6),eyeDark);pupil.position.set(x*.105,2.43,-.276);headGroup.add(pupil);}
- const hair=new THREE.Mesh(new THREE.SphereGeometry(.292,16,10,0,Math.PI*2,0,Math.PI*.57),makeMaterial(0x211f1b));hair.position.set(0,2.49,.015);headGroup.add(hair);
- const cap=new THREE.Mesh(new THREE.SphereGeometry(.305,16,10,0,Math.PI*2,0,Math.PI*.34),fabric);cap.position.set(0,2.57,0);cap.scale.set(1,.65,1);headGroup.add(cap);
- const brim=new THREE.Mesh(new THREE.BoxGeometry(.48,.045,.25),fabric);brim.position.set(0,2.51,-.25);headGroup.add(brim);
+ const noseBridge=new THREE.Mesh(new THREE.CapsuleGeometry(.034,.12,4,8),skinLight);noseBridge.position.set(0,2.34,-.265);noseBridge.rotation.x=-.12;headGroup.add(noseBridge);
+ const nose=new THREE.Mesh(new THREE.SphereGeometry(.061,16,12),skinLight);nose.scale.set(.92,.72,.86);nose.position.set(0,2.285,-.29);headGroup.add(nose);
+ for(const x of [-1,1]){const nostril=new THREE.Mesh(new THREE.SphereGeometry(.012,8,6),makeMaterial(0x56382d));nostril.position.set(x*.028,2.274,-.337);headGroup.add(nostril);}
+ const eyeWhite=makeMaterial(0xe7dfce),eyeDark=makeMaterial(0x211e1a),irisMat=makeMaterial(0x49352a);
+ for(const x of [-1,1]){const socket=new THREE.Mesh(new THREE.SphereGeometry(.067,14,10),skinLight);socket.position.set(x*.105,2.425,-.226);socket.scale.set(1,.7,.55);headGroup.add(socket);const eye=new THREE.Mesh(new THREE.SphereGeometry(.043,16,12),eyeWhite);eye.scale.set(1,.78,.72);eye.position.set(x*.105,2.425,-.259);headGroup.add(eye);const iris=new THREE.Mesh(new THREE.SphereGeometry(.022,12,10),irisMat);iris.position.set(x*.105,2.425,-.292);headGroup.add(iris);const pupil=new THREE.Mesh(new THREE.SphereGeometry(.011,10,8),eyeDark);pupil.position.set(x*.105,2.425,-.309);headGroup.add(pupil);const lid=new THREE.Mesh(new THREE.TorusGeometry(.052,.012,6,16,Math.PI),skin);lid.position.set(x*.105,2.43,-.272);lid.rotation.z=Math.PI;headGroup.add(lid);}
+ const hairMat=makeMaterial(0x211b18,.96);
+ const hair=new THREE.Mesh(new THREE.SphereGeometry(.294,24,16,0,Math.PI*2,0,Math.PI*.62),hairMat);hair.position.set(0,2.49,.012);hair.scale.set(1,.92,1);headGroup.add(hair);
+ const hairline=new THREE.Mesh(new THREE.SphereGeometry(.286,20,12,0,Math.PI*2,0,Math.PI*.19),hairMat);hairline.position.set(0,2.475,-.055);hairline.scale.set(1,.82,.78);headGroup.add(hairline);
+ for(let n=0;n<5;n++){const lock=new THREE.Mesh(new THREE.CapsuleGeometry(.027,.13,3,6),hairMat);lock.position.set((n-2)*.085,2.56,-.16-Math.abs(n-2)*.012);lock.rotation.z=(n-2)*-.12;headGroup.add(lock);}
  const browMat=makeMaterial(0x332820);for(const x of [-1,1]){const brow=new THREE.Mesh(new THREE.BoxGeometry(.095,.022,.035),browMat);brow.position.set(x*.105,2.49,-.258);brow.rotation.z=x*-.08;headGroup.add(brow);}
- const mouth=new THREE.Mesh(new THREE.BoxGeometry(.095,.018,.018),makeMaterial(0x684333));mouth.position.set(0,2.245,-.27);headGroup.add(mouth);
+ const upperLip=new THREE.Mesh(new THREE.SphereGeometry(.043,12,8),makeMaterial(0x75483b));upperLip.position.set(0,2.205,-.278);upperLip.scale.set(1,.24,.38);headGroup.add(upperLip);
+ const lowerLip=new THREE.Mesh(new THREE.SphereGeometry(.039,12,8),skinLight);lowerLip.position.set(0,2.187,-.279);lowerLip.scale.set(1,.22,.35);headGroup.add(lowerLip);
+ const mouthLine=new THREE.Mesh(new THREE.BoxGeometry(.074,.009,.012),makeMaterial(0x56352e));mouthLine.position.set(0,2.198,-.302);headGroup.add(mouthLine);
+ for(const x of [-1,1]){const cheek=new THREE.Mesh(new THREE.SphereGeometry(.075,12,10),skin);cheek.position.set(x*.16,2.31,-.205);cheek.scale.set(1,.65,.35);headGroup.add(cheek);}
  playerGroup.add(headGroup);playerGroup.userData.head=headGroup;
  const legs=[],arms=[],bootMeshes=[],lowerArms=[];
  for(const side of [-1,1]){
@@ -180,10 +190,12 @@ function addPlayer(){
   const arm=new THREE.Group();arm.position.set(side*.49,1.82,0);playerGroup.add(arm);
   const upper=new THREE.Mesh(new THREE.CapsuleGeometry(.125,.37,6,9),shirt);upper.position.y=-.25;upper.castShadow=true;arm.add(upper);
   const elbow=new THREE.Mesh(new THREE.SphereGeometry(.12,10,8),skin);elbow.position.y=-.49;arm.add(elbow);
-  const forearm=new THREE.Mesh(new THREE.CapsuleGeometry(.105,.34,5,8),skin);forearm.position.y=-.68;forearm.castShadow=true;arm.add(forearm);
+  const forearm=new THREE.Mesh(new THREE.CapsuleGeometry(.105,.34,8,12),skin);forearm.position.y=-.68;forearm.castShadow=true;arm.add(forearm);
+  const forearmSleeve=new THREE.Mesh(new THREE.CapsuleGeometry(.113,.12,5,8),shirt);forearmSleeve.position.y=-.53;arm.add(forearmSleeve);
   const cuff=new THREE.Mesh(new THREE.CylinderGeometry(.112,.112,.09,10),shirtDark);cuff.position.y=-.51;arm.add(cuff);
-  const hand=new THREE.Mesh(new THREE.SphereGeometry(.115,12,10),skin);hand.position.set(0,-.91,-.025);arm.add(hand);
-  const fingerGeo=new THREE.CapsuleGeometry(.026,.105,3,6);for(let f=0;f<4;f++){const finger=new THREE.Mesh(fingerGeo,skin);finger.position.set((f-1.5)*.047,-1.005,-.075);finger.rotation.x=-.18;arm.add(finger);}const thumb=new THREE.Mesh(new THREE.CapsuleGeometry(.03,.09,3,6),skin);thumb.position.set(side*.105,-.94,-.015);thumb.rotation.z=side*.55;arm.add(thumb);
+  const hand=new THREE.Mesh(new THREE.SphereGeometry(.105,16,12),skin);hand.position.set(0,-.91,-.025);hand.scale.set(.9,1.12,.72);arm.add(hand);
+  const fingerGeo=new THREE.CapsuleGeometry(.021,.105,5,8);for(let f=0;f<4;f++){const finger=new THREE.Mesh(fingerGeo,skin);finger.position.set((f-1.5)*.043,-1.005,-.075);finger.rotation.x=-.22;finger.rotation.z=(f-1.5)*-.07;arm.add(finger);}const thumb=new THREE.Mesh(new THREE.CapsuleGeometry(.027,.095,5,8),skin);thumb.position.set(side*.09,-.94,-.015);thumb.rotation.z=side*.62;arm.add(thumb);
+  const knuckleMat=makeMaterial(0x9e6c4e);for(let f=0;f<4;f++){const knuckle=new THREE.Mesh(new THREE.SphereGeometry(.023,8,6),knuckleMat);knuckle.position.set((f-1.5)*.043,-.967,-.085);arm.add(knuckle);}
   if(side===1){const scanner=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(.17,.28,.12),makeMaterial(0x344e50));body.position.y=-.94;scanner.add(body);const screen=new THREE.Mesh(new THREE.BoxGeometry(.115,.09,.012),new THREE.MeshStandardMaterial({color:0x70dfc5,emissive:0x247d69,emissiveIntensity:.7,roughness:.25}));screen.position.set(0,-.91,-.068);scanner.add(screen);const grip=new THREE.Mesh(new THREE.CylinderGeometry(.035,.045,.13,8),makeMaterial(0x1e292a));grip.position.set(0,-1.13,0);scanner.add(grip);arm.add(scanner);scanner.visible=false;playerGroup.userData.fieldScanner=scanner;}
   arms.push(arm);lowerArms.push(forearm);
  }
@@ -256,16 +268,19 @@ function updatePlayer(dt){
   playerGroup.rotation.y+=angleDelta*(1-Math.exp(-18*dt));
   walkTime+=dt*(sprinting?12:8)*Math.min(1,actualSpeed/maxSpeed);
   const gait=Math.min(1,actualSpeed/maxSpeed);
-  playerGroup.userData.legs[0].rotation.x=Math.sin(walkTime)*.62*gait;
-  playerGroup.userData.legs[1].rotation.x=-Math.sin(walkTime)*.62*gait;
-  playerGroup.userData.arms[0].rotation.x=-Math.sin(walkTime)*.34*gait;
-  playerGroup.userData.arms[1].rotation.x=Math.sin(walkTime)*.34*gait;
+  playerGroup.userData.legs[0].rotation.x=Math.sin(walkTime)*.48*gait;
+  playerGroup.userData.legs[1].rotation.x=-Math.sin(walkTime)*.48*gait;
+  playerGroup.userData.arms[0].rotation.x=-Math.sin(walkTime)*.29*gait;
+  playerGroup.userData.arms[1].rotation.x=Math.sin(walkTime)*.29*gait;
+  playerGroup.userData.lowerArms.forEach((a,i)=>{a.rotation.x=Math.max(0,Math.sin(walkTime+(i?Math.PI:0)))*.16*gait;});
   playerGroup.userData.head.rotation.y=Math.sin(walkTime*.45)*.025;
+  playerGroup.position.y+=Math.abs(Math.sin(walkTime*2))*.025*gait;
   if(playerGroup.userData.torso){playerGroup.userData.torso.rotation.z=clamp(-playerGroup.userData.velocity.x*.012,-.07,.07);playerGroup.userData.torso.scale.y=1.08;}
  }else{
   playerGroup.userData.velocity.x=0;playerGroup.userData.velocity.z=0;
   playerGroup.userData.legs.forEach(l=>l.rotation.x*=Math.exp(-12*dt));
   playerGroup.userData.arms.forEach(a=>a.rotation.x*=Math.exp(-12*dt));
+  playerGroup.userData.lowerArms.forEach(a=>a.rotation.x*=Math.exp(-10*dt));
   playerGroup.userData.head.rotation.y=Math.sin(elapsed*1.1)*.025;
   if(playerGroup.userData.torso){playerGroup.userData.torso.scale.y=1.08+Math.sin(elapsed*2.1)*.012;playerGroup.userData.torso.rotation.z=Math.sin(elapsed*1.35)*.012;}
  }
