@@ -21,7 +21,7 @@
     <header class="topbar">
       <a class="brand" href="#" aria-label="BATALHA-MOZ início"><span class="brand-mark">B</span><span>BATALHA<span class="brand-accent">-MOZ</span><small>ARENA DE SOBREVIVÊNCIA</small></span></a>
       <div class="top-status"><span class="live-dot"></span> MODO EXPLORAÇÃO <span class="status-divider">|</span><span id="weather-label">TEMPO LIMPO</span></div>
-      <button id="sound-btn" class="icon-button" aria-label="Alternar som" title="Som">♫</button>
+      <div class="top-actions"><button id="inventory-toggle" class="inventory-toggle hidden">MOCHILA <span id="inventory-count">0/12</span></button><button id="sound-btn" class="icon-button" aria-label="Alternar som" title="Som">♫</button></div>
     </header>
 
     <section class="intro-panel" id="intro-panel">
@@ -38,11 +38,13 @@
       <div class="hud-card time-card"><span class="hud-label">AMBIENTE</span><strong id="clock-label">08:30</strong><small id="weather-detail">VENTO SUAVE</small></div>
     </section>
 
+    <div class="interaction-prompt hidden" id="interaction-prompt">PRIMA <b>E</b> PARA INTERAGIR</div>
     <div class="drop-status hidden" id="drop-status"><span class="drop-kicker">OPERAÇÃO ILHA</span><strong id="phase-label">A EMBARCAR</strong><small id="phase-detail">A preparar a descida panorâmica</small></div>
     <div class="mobile-controls hidden" id="mobile-controls"><div class="stick-zone" id="stick-zone"><div class="stick-base"><div class="stick-knob" id="stick-knob"></div></div></div><div class="action-controls"><button id="jump-touch" class="touch-action">↑<small>SALTAR</small></button></div></div>
+    <div class="inventory-panel hidden" id="inventory-panel" aria-label="Inventário"><div class="inventory-head"><div><span class="eyebrow">EQUIPAMENTO DO EXPLORADOR</span><h2>MOCHILA</h2><small id="inventory-capacity">CAPACIDADE 0 / 12</small></div><button id="inventory-close" class="inventory-close" aria-label="Fechar inventário">×</button></div><div class="inventory-layout"><section class="inventory-items"><div class="inventory-tabs" id="inventory-tabs"><button class="active" data-category="all">TODOS</button><button data-category="supplies">SUPRIMENTOS</button><button data-category="materials">MATERIAIS</button><button data-category="equipment">EQUIPAMENTO</button></div><div class="inventory-grid" id="inventory-grid"></div><p class="inventory-empty hidden" id="inventory-empty">Ainda não recolheste objetos. Explora a ilha e aproxima-te dos itens.</p></section><aside class="inventory-details"><div class="selected-art" id="selected-art">◇</div><span class="detail-category" id="selected-category">SEM SELECÇÃO</span><h3 id="selected-name">Escolhe um item</h3><p id="selected-description">Os objetos recolhidos aparecem aqui.</p><div class="detail-quantity" id="selected-quantity">—</div><div class="inventory-actions"><button id="item-primary" disabled>UTILIZAR</button><button id="item-equip" disabled>EQUIPAR</button><button id="item-drop" disabled>DESCARTAR 1</button></div><div class="equipment-slots"><span>MOCHILA</span><b id="equipped-backpack">Padrão</b><span>ACESSÓRIO</span><b id="equipped-compass">Nenhum</b><span>CALÇADO</span><b id="equipped-boots">Padrão</b></div></aside></div></div>
     <div class="toast hidden" id="toast"></div>
     <div class="center-message hidden" id="win-message"><div class="win-icon">✦</div><p class="eyebrow">MISSÃO CONCLUÍDA</p><h2>EXPLORADOR<br><span>DA ILHA.</span></h2><p>Encontraste todos os cristais. A aventura continua.</p><button id="continue-btn" class="primary-btn">CONTINUAR A EXPLORAR →</button></div>
-    <div class="bottom-hint hidden" id="bottom-hint">W A S D <span>MOVER</span> &nbsp; SPACE <span>SALTAR</span> &nbsp; ESC <span>LIBERTAR RATO</span></div>
+    <div class="bottom-hint hidden" id="bottom-hint">W A S D <span>MOVER</span> &nbsp; E <span>INTERAGIR</span> &nbsp; I <span>MOCHILA</span> &nbsp; SPACE <span>SALTAR</span></div>
     <div class="loading" id="loading"><div class="loader-mark">B</div><strong>BATALHA<span>-MOZ</span></strong><div class="loading-track"><i></i></div><small>A PREPARAR A ILHA...</small></div>
     <div class="error-panel hidden" id="error-panel">Não foi possível iniciar o mundo 3D. Verifica a ligação à internet e recarrega a página.</div>
   </main>
