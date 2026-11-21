@@ -30,3 +30,13 @@ O repositório está configurado como Render Static Site com publicação autom�
 
 ## Limitações atuais
 É um protótipo de exploração single-player, não um jogo comercial completo. Ainda não inclui multiplayer online, matchmaking, servidor dedicado, modelos humanos externos com animação profissional, mapa de grande escala, interiores completos, veículos dirigíveis ou sistema de lobby completo. A sequência de avião e paraquedas é uma animação de jogo, não uma simulação física real.
+
+
+## Módulo 4 — Inventário e equipamentos
+- Mochila com 12 espaços e capacidade aumentada para 18 com mochila reforçada.
+- Categorias: suprimentos, materiais e equipamentos.
+- Recolha contextual com a tecla E, perto dos objetos 3D no mapa.
+- Seleção de itens, utilização de água/ração/estojo, descarte no mundo e limite de capacidade.
+- Equipamento de mochila, bússola e botas com alterações visuais e efeitos no jogo.
+- Interação com portas das casas usando E.
+- Abrir/fechar inventário com I ou pelo botão MOCHILA.
