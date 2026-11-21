@@ -66,7 +66,7 @@ function addPalmGroves(){
   palm.userData.swayPhase=seeded(i+3800)*6;palm.position.set(x,y,z);scene.add(palm);
  }
 }
-function addRocks(){for(let i=0;i<48;i++){const a=seeded(i+600)*Math.PI*2,r=9+seeded(i+700)*76,x=Math.cos(a)*r,z=Math.sin(a)*r,s=.6+seeded(i+800)*1.7;const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(s,1),makeMaterial(0x777d76));rock.position.set(x,terrainHeight(x,z)+s*.55,z);rock.scale.y=.7;rock.rotation.set(seeded(i)*2,seeded(i+1)*3,seeded(i+2));rock.castShadow=true;rock.receiveShadow=true;scene.add(rock);}}
+function addRocks(){for(let i=0;i<48;i++){const a=seeded(i+600)*Math.PI*2,r=9+seeded(i+700)*76,x=Math.cos(a)*r,z=Math.sin(a)*r,s=.6+seeded(i+800)*1.7;const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(s,1),makeMaterial(0x777d76));rock.position.set(x,terrainHeight(x,z)+s*.55,z);rock.scale.y=.7;rock.rotation.set(seeded(i)*2,seeded(i+1)*3,seeded(i+2));rock.castShadow=true;rock.receiveShadow=true;scene.add(rock);colliders.push({x,z,r:s*.82,kind:"rock"});}}
 function addClouds(){const cloudMat=new THREE.MeshStandardMaterial({color:0xf3f5ee,roughness:1,transparent:true,opacity:.83});for(let i=0;i<18;i++){const cloud=new THREE.Group();for(let j=0;j<5;j++){const puff=new THREE.Mesh(new THREE.SphereGeometry(2.5+seeded(i*8+j)*2,10,8),cloudMat);puff.position.set(j*2.7,seeded(j+i)*1.4,seeded(j+30)*2);cloud.add(puff);}cloud.position.set((seeded(i+900)-.5)*210,28+seeded(i+1000)*17,(seeded(i+1100)-.5)*180);cloud.userData.speed=.25+seeded(i+1200)*.35;scene.add(cloud);}}
 function addBirds(){
  const birdMat=makeMaterial(0x26383a,.85);
@@ -140,7 +140,8 @@ function addCrystals(){const positions=[[-13,-9],[18,-15],[-29,24],[34,30],[4,48
 function addPlayer(){
  playerGroup=new THREE.Group();
  const skin=makeMaterial(0x9b6948,.86),skinLight=makeMaterial(0xb77e59,.9),shirt=makeMaterial(0x344b48,.94),shirtDark=makeMaterial(0x223632,.98),pants=makeMaterial(0x343d3b,.98),bootMaterial=makeMaterial(0x171d1b,.9),leather=makeMaterial(0x765238,.9),fabric=makeMaterial(0x46534a,.95),metal=makeMaterial(0x68716c,.55);
- const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.39,.72,7,12),shirt);torso.position.y=1.48;torso.scale.set(1.08,1.08,.82);torso.castShadow=true;playerGroup.add(torso);
+ const pelvis=new THREE.Mesh(new THREE.CapsuleGeometry(.29,.22,5,10),pants);pelvis.position.y=1.02;pelvis.scale.set(1.08,.8,.88);pelvis.castShadow=true;playerGroup.add(pelvis);
+ const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.39,.72,7,12),shirt);torso.position.y=1.48;torso.scale.set(1.08,1.08,.82);torso.castShadow=true;playerGroup.add(torso);playerGroup.userData.torso=torso;
  const chest=new THREE.Mesh(new THREE.BoxGeometry(.68,.48,.13),shirtDark);chest.position.set(0,1.62,-.31);chest.castShadow=true;playerGroup.add(chest);
  const collar=new THREE.Mesh(new THREE.CylinderGeometry(.19,.23,.16,12),leather);collar.position.y=1.98;playerGroup.add(collar);
  const neck=new THREE.Mesh(new THREE.CylinderGeometry(.13,.16,.22,12),skin);neck.position.y=2.03;playerGroup.add(neck);
@@ -162,6 +163,8 @@ function addPlayer(){
  const hair=new THREE.Mesh(new THREE.SphereGeometry(.292,16,10,0,Math.PI*2,0,Math.PI*.57),makeMaterial(0x211f1b));hair.position.set(0,2.49,.015);headGroup.add(hair);
  const cap=new THREE.Mesh(new THREE.SphereGeometry(.305,16,10,0,Math.PI*2,0,Math.PI*.34),fabric);cap.position.set(0,2.57,0);cap.scale.set(1,.65,1);headGroup.add(cap);
  const brim=new THREE.Mesh(new THREE.BoxGeometry(.48,.045,.25),fabric);brim.position.set(0,2.51,-.25);headGroup.add(brim);
+ const browMat=makeMaterial(0x332820);for(const x of [-1,1]){const brow=new THREE.Mesh(new THREE.BoxGeometry(.095,.022,.035),browMat);brow.position.set(x*.105,2.49,-.258);brow.rotation.z=x*-.08;headGroup.add(brow);}
+ const mouth=new THREE.Mesh(new THREE.BoxGeometry(.095,.018,.018),makeMaterial(0x684333));mouth.position.set(0,2.245,-.27);headGroup.add(mouth);
  playerGroup.add(headGroup);playerGroup.userData.head=headGroup;
  const legs=[],arms=[],bootMeshes=[],lowerArms=[];
  for(const side of [-1,1]){
@@ -178,7 +181,9 @@ function addPlayer(){
   const elbow=new THREE.Mesh(new THREE.SphereGeometry(.12,10,8),skin);elbow.position.y=-.49;arm.add(elbow);
   const forearm=new THREE.Mesh(new THREE.CapsuleGeometry(.105,.34,5,8),skin);forearm.position.y=-.68;forearm.castShadow=true;arm.add(forearm);
   const cuff=new THREE.Mesh(new THREE.CylinderGeometry(.112,.112,.09,10),shirtDark);cuff.position.y=-.51;arm.add(cuff);
-  const hand=new THREE.Mesh(new THREE.SphereGeometry(.115,10,8),skin);hand.position.y=-.91;arm.add(hand);
+  const hand=new THREE.Mesh(new THREE.SphereGeometry(.115,12,10),skin);hand.position.set(0,-.91,-.025);arm.add(hand);
+  const fingerGeo=new THREE.CapsuleGeometry(.026,.105,3,6);for(let f=0;f<4;f++){const finger=new THREE.Mesh(fingerGeo,skin);finger.position.set((f-1.5)*.047,-1.005,-.075);finger.rotation.x=-.18;arm.add(finger);}const thumb=new THREE.Mesh(new THREE.CapsuleGeometry(.03,.09,3,6),skin);thumb.position.set(side*.105,-.94,-.015);thumb.rotation.z=side*.55;arm.add(thumb);
+  if(side===1){const scanner=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(.17,.28,.12),makeMaterial(0x344e50));body.position.y=-.94;scanner.add(body);const screen=new THREE.Mesh(new THREE.BoxGeometry(.115,.09,.012),new THREE.MeshStandardMaterial({color:0x70dfc5,emissive:0x247d69,emissiveIntensity:.7,roughness:.25}));screen.position.set(0,-.91,-.068);scanner.add(screen);const grip=new THREE.Mesh(new THREE.CylinderGeometry(.035,.045,.13,8),makeMaterial(0x1e292a));grip.position.set(0,-1.13,0);scanner.add(grip);arm.add(scanner);playerGroup.userData.fieldScanner=scanner;}
   arms.push(arm);lowerArms.push(forearm);
  }
  const pack=new THREE.Group();pack.position.set(0,1.53,.39);playerGroup.add(pack);
@@ -255,11 +260,13 @@ function updatePlayer(dt){
   playerGroup.userData.arms[0].rotation.x=-Math.sin(walkTime)*.34*gait;
   playerGroup.userData.arms[1].rotation.x=Math.sin(walkTime)*.34*gait;
   playerGroup.userData.head.rotation.y=Math.sin(walkTime*.45)*.025;
+  if(playerGroup.userData.torso){playerGroup.userData.torso.rotation.z=clamp(-playerGroup.userData.velocity.x*.012,-.07,.07);playerGroup.userData.torso.scale.y=1.08;}
  }else{
   playerGroup.userData.velocity.x=0;playerGroup.userData.velocity.z=0;
   playerGroup.userData.legs.forEach(l=>l.rotation.x*=Math.exp(-12*dt));
   playerGroup.userData.arms.forEach(a=>a.rotation.x*=Math.exp(-12*dt));
   playerGroup.userData.head.rotation.y=Math.sin(elapsed*1.1)*.025;
+  if(playerGroup.userData.torso){playerGroup.userData.torso.scale.y=1.08+Math.sin(elapsed*2.1)*.012;playerGroup.userData.torso.rotation.z=Math.sin(elapsed*1.35)*.012;}
  }
  if(keys.has("Space")&&onGround){verticalVelocity=8.5;onGround=false;}
  verticalVelocity-=22*dt;playerGroup.position.y+=verticalVelocity*dt;
