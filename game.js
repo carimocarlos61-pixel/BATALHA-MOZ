@@ -104,9 +104,10 @@ function createLootModel(type){
  else if(type==="backpack"){const bag=new THREE.Mesh(new THREE.BoxGeometry(.8,.95,.42),mat);bag.position.y=.58;g.add(bag);const flap=new THREE.Mesh(new THREE.BoxGeometry(.65,.25,.08),makeMaterial(0x55452f));flap.position.set(0,.95,-.23);g.add(flap);}
  else if(type==="compass"){const disk=new THREE.Mesh(new THREE.CylinderGeometry(.38,.38,.13,16),mat);disk.position.y=.28;g.add(disk);const needle=new THREE.Mesh(new THREE.ConeGeometry(.12,.48,4),makeMaterial(0xb94e3c));needle.position.y=.59;g.add(needle);}
  else if(type==="boots"){for(const x of [-.23,.23]){const boot=new THREE.Mesh(new THREE.BoxGeometry(.38,.35,.72),mat);boot.position.set(x,.2,0);g.add(boot);}}
+ else if(type==="crate"){const body=new THREE.Mesh(new THREE.BoxGeometry(1.35,.9,1.05),makeMaterial(0x80603b));body.position.y=.52;g.add(body);for(let x=-1;x<=1;x+=2){const band=new THREE.Mesh(new THREE.BoxGeometry(.12,.96,1.1),makeMaterial(0xc2a36b));band.position.set(x*.43,.52,0);g.add(band);}const lid=new THREE.Mesh(new THREE.BoxGeometry(1.4,.13,1.1),makeMaterial(0x9a7548));lid.position.y=1.04;g.add(lid);const glow=new THREE.Mesh(new THREE.TorusGeometry(.86,.045,8,28),new THREE.MeshBasicMaterial({color:0x8bf0d1}));glow.rotation.x=Math.PI/2;glow.position.y=.12;g.add(glow);}
  return g;
 }
-function addLootObjects(){const placements=[["water",-18,-24],["ration",-33,11],["firstaid",31,-35],["wood",-42,13],["crystal",43,8],["backpack",-24,-30],["compass",11,61],["boots",37,13],["water",8,42],["ration",17,-18],["wood",40,-1]];
+function addLootObjects(){const placements=[["water",-18,-24],["ration",-33,11],["firstaid",31,-35],["wood",-42,13],["crystal",43,8],["backpack",-24,-30],["compass",11,61],["boots",37,13],["water",8,42],["ration",17,-18],["wood",40,-1],["crate",-8,34],["crate",49,-22],["crate",-51,-19]];
  for(const [type,x,z] of placements){const model=createLootModel(type);model.position.set(x,terrainHeight(x,z),z);model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});model.userData={loot:true,type,baseY:model.position.y,phase:seeded(x+z)*6};scene.add(model);lootObjects.push(model);}}
 function itemCount(){return inventory.reduce((n,item)=>n+item.qty,0);}
 function addItem(type,qty=1){const def=itemDefs[type];if(!def)return false;let remaining=qty;for(const item of inventory){if(item.type===type&&item.qty<def.stack){const add=Math.min(remaining,def.stack-item.qty);item.qty+=add;remaining-=add;if(!remaining)break;}}while(remaining>0&&itemCount()<inventoryCapacity()){const add=Math.min(remaining,def.stack);inventory.push({id:type+"-"+Date.now()+"-"+Math.random().toString(36).slice(2,6),type,qty:add});remaining-=add;}renderInventory();return remaining===0;}
@@ -123,14 +124,15 @@ function applyEquipmentVisuals(){if(!playerGroup)return;const pack=playerGroup.u
 function dropSelectedItem(){const item=selectedItem();if(!item)return;const d=itemDefs[item.type];if(d.slot&&equipment[d.slot]===item.type){showToast("RETIRA O EQUIPAMENTO ANTES DE O DESCARTAR");return;}const type=item.type;removeItem(item.id);const model=createLootModel(type);model.position.set(playerGroup.position.x+Math.sin(yaw)*1.8,terrainHeight(playerGroup.position.x+Math.sin(yaw)*1.8,playerGroup.position.z-Math.cos(yaw)*1.8),playerGroup.position.z-Math.cos(yaw)*1.8);model.userData={loot:true,type,baseY:model.position.y,phase:Math.random()*6};scene.add(model);lootObjects.push(model);showToast(d.name.toUpperCase()+" DESCARTADO");}
 function updateInteractions(){
  let best=null,bestDist=3.4;
- for(const loot of lootObjects){if(loot.userData.collected)continue;const d=Math.hypot(playerGroup.position.x-loot.position.x,playerGroup.position.z-loot.position.z);if(d<bestDist){best={type:"loot",object:loot,distance:d};bestDist=d;}}
+ for(const loot of lootObjects){if(loot.userData.collected)continue;const d=Math.hypot(playerGroup.position.x-loot.position.x,playerGroup.position.z-loot.position.z);if(d<bestDist){best={type:loot.userData.type==="crate"?"crate":"loot",object:loot,distance:d};bestDist=d;}}
  for(const target of interactables){const d=Math.hypot(playerGroup.position.x-target.x,playerGroup.position.z-target.z);if(d<bestDist){best={type:target.type==="guide"?"guide":"door",object:target,distance:d};bestDist=d;}}
  nearestInteractable=best;$("interaction-prompt").classList.toggle("hidden",!best||inventoryOpen);
- if(best&&!inventoryOpen){const prompt=best.type==="loot"?"PRIMA E PARA RECOLHER: "+itemDefs[best.object.userData.type].name:best.type==="guide"?"PRIMA E PARA FALAR COM O GUIA":"PRIMA E PARA "+(best.object.open?"FECHAR":"ABRIR")+" A PORTA";$("interaction-prompt").textContent=prompt;}
+ if(best&&!inventoryOpen){const prompt=best.type==="crate"?"PRIMA E PARA ABRIR: CAIXA-SURPRESA":best.type==="loot"?"PRIMA E PARA RECOLHER: "+itemDefs[best.object.userData.type].name:best.type==="guide"?"PRIMA E PARA FALAR COM O GUIA":"PRIMA E PARA "+(best.object.open?"FECHAR":"ABRIR")+" A PORTA";$("interaction-prompt").textContent=prompt;}
 }
 function interact(){
  if(inventoryOpen||!nearestInteractable)return;const target=nearestInteractable;
- if(target.type==="loot"){const loot=target.object,type=loot.userData.type;if(addItem(type)){loot.userData.collected=true;scene.remove(loot);lootObjects.splice(lootObjects.indexOf(loot),1);showToast(itemDefs[type].name.toUpperCase()+" RECOLHIDO");nearestInteractable=null;}else showToast("MOCHILA CHEIA • DESCARTA UM ITEM");}
+ if(target.type==="crate"){const loot=target.object,rewards=["firstaid","water","ration","compass","boots","crystal","wood"],reward=rewards[Math.floor(Math.random()*rewards.length)];if(addItem(reward)){loot.userData.collected=true;scene.remove(loot);lootObjects.splice(lootObjects.indexOf(loot),1);showToast("CAIXA ABERTA • RECEBESTE: "+itemDefs[reward].name.toUpperCase());nearestInteractable=null;}else showToast("MOCHILA CHEIA • LIBERTA UM ESPAÇO");}
+ else if(target.type==="loot"){const loot=target.object,type=loot.userData.type;if(addItem(type)){loot.userData.collected=true;scene.remove(loot);lootObjects.splice(lootObjects.indexOf(loot),1);showToast(itemDefs[type].name.toUpperCase()+" RECOLHIDO");nearestInteractable=null;}else showToast("MOCHILA CHEIA • DESCARTA UM ITEM");}
  else if(target.type==="guide"){const count=crystals.filter(c=>c.userData.collected).length;if(!questReady){showToast("GUIA: RECOLHE OS CINCO CRISTAIS. PROGRESSO "+count+"/"+CRYSTAL_TOTAL+".");}else{won=true;$("win-message").classList.remove("hidden");document.exitPointerLock?.();showToast("MISSÃO CONCLUÍDA • REGRESSASTE AO GUIA");}}
  else if(target.type==="door"){target.object.open=!target.object.open;target.object.door.rotation.y=target.object.open?-Math.PI*.48:0;showToast(target.object.open?"PORTA ABERTA":"PORTA FECHADA");}
 }
@@ -149,7 +151,7 @@ function addPlayer(){
  const chestStrap=new THREE.Mesh(new THREE.BoxGeometry(.11,.83,.075),leather);chestStrap.position.set(.2,1.57,-.39);chestStrap.rotation.z=-.24;playerGroup.add(chestStrap);
  const chestStrap2=new THREE.Mesh(new THREE.BoxGeometry(.11,.83,.075),leather);chestStrap2.position.set(-.2,1.57,-.39);chestStrap2.rotation.z=.24;playerGroup.add(chestStrap2);
  for(const x of [-.2,.2]){const pocket=new THREE.Mesh(new THREE.BoxGeometry(.2,.22,.09),fabric);pocket.position.set(x,1.36,-.39);playerGroup.add(pocket);const flap=new THREE.Mesh(new THREE.BoxGeometry(.22,.055,.1),leather);flap.position.set(x,1.49,-.4);playerGroup.add(flap);}
- const sidePouch=new THREE.Mesh(new THREE.BoxGeometry(.2,.28,.18),leather);sidePouch.position.set(.37,1.02,-.04);playerGroup.add(sidePouch);
+ const sidePouch=new THREE.Mesh(new THREE.BoxGeometry(.2,.28,.18),leather);sidePouch.position.set(.37,1.02,-.04);playerGroup.add(sidePouch);const radio=new THREE.Mesh(new THREE.BoxGeometry(.16,.25,.1),metal);radio.position.set(-.39,1.72,.12);playerGroup.add(radio);const radioAntenna=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.24,5),makeMaterial(0x202b2b));radioAntenna.position.set(-.39,1.96,.12);playerGroup.add(radioAntenna);const shoulderBadge=new THREE.Mesh(new THREE.BoxGeometry(.2,.16,.045),makeMaterial(0xc7ad6b));shoulderBadge.position.set(.43,1.83,-.12);playerGroup.add(shoulderBadge);
  const headGroup=new THREE.Group();
  const head=new THREE.Mesh(new THREE.SphereGeometry(.285,20,16),skin);head.scale.set(.92,1.12,.9);head.position.y=2.38;head.castShadow=true;headGroup.add(head);
  const earGeo=new THREE.SphereGeometry(.075,10,8);
@@ -206,7 +208,7 @@ function addPlane(){
  const wing=new THREE.Mesh(new THREE.BoxGeometry(2,.22,18),makeMaterial(0x89979a));wing.castShadow=true;plane.add(wing);
  const tail=new THREE.Mesh(new THREE.BoxGeometry(1.5,.18,5),makeMaterial(0x89979a));tail.position.set(-5,1,0);plane.add(tail);
  const fin=new THREE.Mesh(new THREE.BoxGeometry(2,.18,.22),makeMaterial(0x53646a));fin.position.set(-5,1.7,0);plane.add(fin);
- const cockpit=new THREE.Mesh(new THREE.SphereGeometry(.8,12,8),new THREE.MeshStandardMaterial({color:0x9bd1d5,metalness:.5,roughness:.18,transparent:true,opacity:.82}));cockpit.scale.set(1.2,.7,.9);cockpit.position.set(3,.55,0);plane.add(cockpit);
+ const cockpit=new THREE.Mesh(new THREE.SphereGeometry(.8,12,8),new THREE.MeshStandardMaterial({color:0x9bd1d5,metalness:.5,roughness:.18,transparent:true,opacity:.82}));cockpit.scale.set(1.2,.7,.9);cockpit.position.set(3,.55,0);plane.add(cockpit);const engineProps=[];for(const z of [-5.1,5.1]){const engine=new THREE.Mesh(new THREE.CylinderGeometry(.42,.48,2.5,12),makeMaterial(0x46565b));engine.rotation.z=Math.PI/2;engine.position.set(.25,.05,z);plane.add(engine);const prop=new THREE.Group();for(let k=0;k<3;k++){const blade=new THREE.Mesh(new THREE.BoxGeometry(.12,1.65,.22),makeMaterial(0x26343a));blade.rotation.x=k*Math.PI*2/3;prop.add(blade);}prop.position.set(1.55,.05,z);plane.add(prop);engineProps.push(prop);}plane.userData.engineProps=engineProps;
  plane.position.set(-105,48,-12);plane.rotation.y=Math.PI/2;scene.add(plane);
  parachute=new THREE.Group();
  const canopy=new THREE.Mesh(new THREE.SphereGeometry(3.4,20,12,0,Math.PI*2,0,Math.PI*.52),new THREE.MeshStandardMaterial({color:0xc5a15b,roughness:.8,side:THREE.DoubleSide}));canopy.position.y=5.2;canopy.scale.set(1,.72,1);parachute.add(canopy);
@@ -219,9 +221,9 @@ function updateDropSequence(dt){
  if(dropPhase==="waiting"||dropPhase==="landed")return;
  dropElapsed+=dt;const t=dropElapsed;
  if(t<3){plane.position.x=-105+t*19;plane.position.y=48+Math.sin(t*1.3)*1.2;playerGroup.position.set(plane.position.x+5,plane.position.y-3,plane.position.z);camera.position.lerp(new THREE.Vector3(plane.position.x-19,plane.position.y+11,plane.position.z+24),.045);camera.lookAt(plane.position);$("phase-label").textContent="A BORDO";$("phase-detail").textContent="Sobrevoando a costa de Moçambique";}
- else if(t<10){if(dropPhase!=="descending"){dropPhase="descending";playerGroup.visible=true;parachute.visible=true;}
- const p=(t-3)/7,x=-48+p*48,z=-12+p*8,y=48-p*(48-terrainHeight(x,z));playerGroup.position.set(x,y,z);parachute.position.set(x,y-1,z);plane.position.x=-48+(t-3)*8;plane.position.y=48;playerGroup.rotation.y=Math.PI/2;$("phase-label").textContent="DESCIDA";$("phase-detail").textContent="A aproximar-se da zona de aterragem";camera.position.lerp(new THREE.Vector3(x+10,y+9,z+13),.035);camera.lookAt(x,y+2,z);}
- else{dropPhase="landed";plane.visible=false;parachute.visible=false;playerGroup.visible=true;playerGroup.position.set(0,terrainHeight(0,0),-4);verticalVelocity=0;onGround=true;$("phase-label").textContent="ATERRAGEM CONCLUÍDA";$("phase-detail").textContent="Explora a ilha e encontra os cinco cristais";setTimeout(()=>$("drop-status").classList.add("hidden"),2600);showToast("BEM-VINDO À ILHA • MISSÃO INICIADA");}
+ else if(t<16){if(dropPhase!=="descending"){dropPhase="descending";playerGroup.visible=true;parachute.visible=true;}
+ const p=clamp((t-3)/13,0,1),ease=p*p*(3-2*p),x=-48+ease*48,z=-12+ease*8,floor=terrainHeight(x,z),y=48-ease*(48-(floor+2.25));playerGroup.position.set(x,y,z);parachute.position.set(x,y-1,z);plane.position.x=-48+(t-3)*5.5;plane.position.y=48+Math.sin(t*.45)*.5;plane.rotation.z=Math.sin(t*.35)*.025;playerGroup.rotation.y=-Math.PI/2;const glide=Math.sin(t*1.1)*.16;parachute.rotation.z=glide;parachute.rotation.x=Math.cos(t*.8)*.08;$("phase-label").textContent="DESCIDA";$("phase-detail").textContent="A aproximar-se da zona de aterragem";camera.position.lerp(new THREE.Vector3(x+10,y+9,z+13),.035);camera.lookAt(x,y+2,z);}
+ else{dropPhase="landed";plane.visible=false;parachute.visible=false;playerGroup.visible=true;playerGroup.position.set(0,terrainHeight(0,0),-4);playerGroup.rotation.y=0;playerGroup.userData.velocity={x:0,z:0};yaw=0;verticalVelocity=0;onGround=true;camera.position.set(0,terrainHeight(0,0)+7,9);camera.lookAt(0,terrainHeight(0,0)+2,-4);$("phase-label").textContent="ATERRAGEM CONCLUÍDA";$("phase-detail").textContent="Explora a ilha e encontra os cinco cristais";setTimeout(()=>$("drop-status").classList.add("hidden"),2600);showToast("BEM-VINDO À ILHA • MISSÃO INICIADA");}
 }
 function buildSky(){const skyGeo=new THREE.SphereGeometry(260,24,16);const skyMat=new THREE.MeshBasicMaterial({color:0x8bbdce,side:THREE.BackSide});scene.add(new THREE.Mesh(skyGeo,skyMat));}
 function showToast(message){ui.toast.textContent=message;ui.toast.classList.remove("hidden");toastTimer=2.3;}
@@ -235,7 +237,7 @@ function updatePlayer(dt){
  const maxSpeed=(sprinting?9.2:5.4)+(equipment.boots?.65:0);
  const input=new THREE.Vector3(side,0,-forward);
  if(input.lengthSq()>1)input.normalize();
- input.applyAxisAngle(new THREE.Vector3(0,1,0),yaw);
+ input.applyAxisAngle(new THREE.Vector3(0,1,0),-yaw);
  const response=1-Math.exp(-13*dt);
  playerGroup.userData.velocity.x+=(input.x*maxSpeed-playerGroup.userData.velocity.x)*response;
  playerGroup.userData.velocity.z+=(input.z*maxSpeed-playerGroup.userData.velocity.z)*response;
@@ -270,7 +272,7 @@ function updatePlayer(dt){
  playerGroup.position.x=clamp(playerGroup.position.x,-WORLD/2+5,WORLD/2-5);
  playerGroup.position.z=clamp(playerGroup.position.z,-WORLD/2+5,WORLD/2-5);
  const target=new THREE.Vector3(playerGroup.position.x,playerGroup.position.y+2.25,playerGroup.position.z);
- const offset=new THREE.Vector3(Math.sin(yaw)*cameraDistance,2.6+pitch*5,Math.cos(yaw)*cameraDistance);
+ const offset=new THREE.Vector3(-Math.sin(yaw)*cameraDistance,2.6+pitch*5,Math.cos(yaw)*cameraDistance);
  camera.position.lerp(target.clone().add(offset),1-Math.pow(.001,dt));camera.lookAt(target);
  updateSurvival(dt,actualSpeed>.25);checkCrystals();updateInteractions();
 }
@@ -300,6 +302,7 @@ function updateEnvironment(dt){
  $("clock-label").textContent=String(Math.floor(h)).padStart(2,"0")+":"+String(Math.floor((h%1)*60)).padStart(2,"0");
  for(const obj of scene.children){
   if(obj.userData.speed){obj.position.x+=obj.userData.speed*dt;if(obj.position.x>125)obj.position.x=-125;}
+  if(obj===plane&&obj.userData.engineProps)obj.userData.engineProps.forEach(prop=>prop.rotation.x+=dt*24);
   if(obj.userData.bird){
    obj.position.x+=obj.userData.speed*dt;obj.position.z+=Math.sin(elapsed*.35+obj.userData.phase)*dt*.55;
    const flap=Math.sin(elapsed*7+obj.userData.phase)*.48;
