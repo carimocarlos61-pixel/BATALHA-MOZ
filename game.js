@@ -42,7 +42,7 @@ function buildWorld(){
  const colors=[];for(let i=0;i<pos.count;i++){const h=pos.getY(i),n=(seeded(i+17)-.5)*.055;const c=new THREE.Color(h>5?0x6f766c:h>1?0x637e4d:0x547b48);c.offsetHSL(0,n,n);colors.push(c.r,c.g,c.b);}groundGeo.setAttribute("color",new THREE.Float32BufferAttribute(colors,3));const ground=new THREE.Mesh(groundGeo,new THREE.MeshStandardMaterial({color:0xffffff,roughness:1,vertexColors:true}));ground.receiveShadow=true;scene.add(ground);terrain=ground;
  const shore=new THREE.Mesh(new THREE.PlaneGeometry(600,600),makeMaterial(0x315e68));shore.rotation.x=-Math.PI/2;shore.position.y=-8;scene.add(shore);
  const safeRing=new THREE.Mesh(new THREE.TorusGeometry(SAFE_ZONE_RADIUS,.22,8,180),new THREE.MeshStandardMaterial({color:0x70e8c5,emissive:0x1b8e70,emissiveIntensity:1.15,transparent:true,opacity:.82}));safeRing.rotation.x=-Math.PI/2;safeRing.position.y=1.05;safeRing.receiveShadow=false;scene.add(safeRing);
- addMountainRing();addForest();addRocks();addClouds();addBuildings();addCrystals();addPlayer();addLootObjects();addPlane();buildSky();
+ addMountainRing();addForest();addRocks();addClouds();addBuildings();addCrystals();addPlayer();addGuideNPC();addLootObjects();addPlane();buildSky();
 }
 function addMountainRing(){const mat=makeMaterial(0x596b68);for(let i=0;i<22;i++){const a=i/22*Math.PI*2,r=105+seeded(i)*12,h=18+seeded(i+50)*24;const m=new THREE.Mesh(new THREE.ConeGeometry(12+seeded(i+80)*9,h,7),mat);m.position.set(Math.cos(a)*r,h/2-2,Math.sin(a)*r);m.rotation.y=seeded(i+4)*Math.PI;m.castShadow=true;scene.add(m);}}
 function addTree(x,z,s=1){const y=terrainHeight(x,z),g=new THREE.Group();const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.22*s,.38*s,3.2*s,7),makeMaterial(0x59412d));trunk.position.y=1.6*s;trunk.castShadow=true;g.add(trunk);for(let j=0;j<3;j++){const crown=new THREE.Mesh(new THREE.ConeGeometry((2.1-j*.27)*s,3.2*s,8),makeMaterial(j===0?0x315c3d:0x3e7048));crown.position.y=(3+j*1.25)*s;crown.castShadow=true;g.add(crown);}g.position.set(x,y,z);scene.add(g);colliders.push({x,z,r:1.0*s});}
@@ -89,8 +89,19 @@ function useSelectedItem(){const item=selectedItem();if(!item)return;const d=ite
 function equipSelectedItem(){const item=selectedItem();if(!item)return;const d=itemDefs[item.type];if(!d.slot)return;if(equipment[d.slot]===item.type){showToast("ESTE EQUIPAMENTO JÁ ESTÁ ACTIVO");return;}if(d.slot==="backpack"&&!equipment.backpack&&itemCount()>12){showToast("ESVAZIA A MOCHILA ANTES DE EQUIPAR");return;}equipment[d.slot]=item.type;removeItem(item.id);applyEquipmentVisuals();renderInventory();showToast(d.name.toUpperCase()+" EQUIPADO");}
 function applyEquipmentVisuals(){if(!playerGroup)return;const pack=playerGroup.userData.backpack;if(pack){pack.material=makeMaterial(equipment.backpack?0x465f51:0x9b7138);pack.scale.setScalar(equipment.backpack?1.18:1);}const compass=playerGroup.userData.compass;if(compass)compass.visible=!!equipment.compass;const boots=playerGroup.userData.boots||[];boots.forEach(b=>{b.material=makeMaterial(equipment.boots?0x5b6848:0x161d20);b.scale.set(equipment.boots?1.12:1,1,equipment.boots?1.08:1);});}
 function dropSelectedItem(){const item=selectedItem();if(!item)return;const d=itemDefs[item.type];if(d.slot&&equipment[d.slot]===item.type){showToast("RETIRA O EQUIPAMENTO ANTES DE O DESCARTAR");return;}const type=item.type;removeItem(item.id);const model=createLootModel(type);model.position.set(playerGroup.position.x+Math.sin(yaw)*1.8,terrainHeight(playerGroup.position.x+Math.sin(yaw)*1.8,playerGroup.position.z-Math.cos(yaw)*1.8),playerGroup.position.z-Math.cos(yaw)*1.8);model.userData={loot:true,type,baseY:model.position.y,phase:Math.random()*6};scene.add(model);lootObjects.push(model);showToast(d.name.toUpperCase()+" DESCARTADO");}
-function updateInteractions(){let best=null,bestDist=3.4;for(const loot of lootObjects){if(loot.userData.collected)continue;const d=Math.hypot(playerGroup.position.x-loot.position.x,playerGroup.position.z-loot.position.z);if(d<bestDist){best={type:"loot",object:loot,distance:d};bestDist=d;}}for(const target of interactables){const d=Math.hypot(playerGroup.position.x-target.x,playerGroup.position.z-target.z);if(d<bestDist){best={type:"door",object:target,distance:d};bestDist=d;}}nearestInteractable=best;$("interaction-prompt").classList.toggle("hidden",!best||inventoryOpen);if(best&&!inventoryOpen){$("interaction-prompt").innerHTML=best.type==="loot"?'PRIMA <b>E</b> PARA RECOLHER: '+itemDefs[best.object.userData.type].name:'PRIMA <b>E</b> PARA '+(best.object.open?"FECHAR":"ABRIR")+" A PORTA";}}
-function interact(){if(inventoryOpen||!nearestInteractable)return;const target=nearestInteractable;if(target.type==="loot"){const loot=target.object,type=loot.userData.type;if(addItem(type)){loot.userData.collected=true;scene.remove(loot);lootObjects.splice(lootObjects.indexOf(loot),1);showToast(itemDefs[type].name.toUpperCase()+" RECOLHIDO");nearestInteractable=null;}else showToast("MOCHILA CHEIA • DESCARTA UM ITEM");}else if(target.type==="door"){target.object.open=!target.object.open;target.object.door.rotation.y=target.object.open?-Math.PI*.48:0;showToast(target.object.open?"PORTA ABERTA":"PORTA FECHADA");}}
+function updateInteractions(){
+ let best=null,bestDist=3.4;
+ for(const loot of lootObjects){if(loot.userData.collected)continue;const d=Math.hypot(playerGroup.position.x-loot.position.x,playerGroup.position.z-loot.position.z);if(d<bestDist){best={type:"loot",object:loot,distance:d};bestDist=d;}}
+ for(const target of interactables){const d=Math.hypot(playerGroup.position.x-target.x,playerGroup.position.z-target.z);if(d<bestDist){best={type:target.type==="guide"?"guide":"door",object:target,distance:d};bestDist=d;}}
+ nearestInteractable=best;$("interaction-prompt").classList.toggle("hidden",!best||inventoryOpen);
+ if(best&&!inventoryOpen){const prompt=best.type==="loot"?"PRIMA E PARA RECOLHER: "+itemDefs[best.object.userData.type].name:best.type==="guide"?"PRIMA E PARA FALAR COM O GUIA":"PRIMA E PARA "+(best.object.open?"FECHAR":"ABRIR")+" A PORTA";$("interaction-prompt").textContent=prompt;}
+}
+function interact(){
+ if(inventoryOpen||!nearestInteractable)return;const target=nearestInteractable;
+ if(target.type==="loot"){const loot=target.object,type=loot.userData.type;if(addItem(type)){loot.userData.collected=true;scene.remove(loot);lootObjects.splice(lootObjects.indexOf(loot),1);showToast(itemDefs[type].name.toUpperCase()+" RECOLHIDO");nearestInteractable=null;}else showToast("MOCHILA CHEIA • DESCARTA UM ITEM");}
+ else if(target.type==="guide"){showToast("GUIA: RECOLHE OS CINCO CRISTAIS, USA A BÚSSOLA E REGRESSA À ZONA SEGURA.");}
+ else if(target.type==="door"){target.object.open=!target.object.open;target.object.door.rotation.y=target.object.open?-Math.PI*.48:0;showToast(target.object.open?"PORTA ABERTA":"PORTA FECHADA");}
+}
 function addCrystals(){const positions=[[-13,-9],[18,-15],[-29,24],[34,30],[4,48]];positions.forEach((p,i)=>{const g=new THREE.Group();const gem=new THREE.Mesh(new THREE.OctahedronGeometry(1.05,0),new THREE.MeshStandardMaterial({color:0x66f2d0,emissive:0x13a98d,emissiveIntensity:1.5,metalness:.25,roughness:.2}));gem.position.y=1.8;gem.castShadow=true;g.add(gem);const ring=new THREE.Mesh(new THREE.TorusGeometry(1.35,.045,8,32),new THREE.MeshBasicMaterial({color:0xc0fff0}));ring.rotation.x=Math.PI/2;ring.position.y=1.3;g.add(ring);g.position.set(p[0],terrainHeight(p[0],p[1]),p[1]);g.userData={gem,ring,index:i};scene.add(g);crystals.push(g);});}
 function addPlayer(){
  playerGroup=new THREE.Group();
@@ -140,6 +151,18 @@ function addPlayer(){
  const compassMesh=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,.08,12),makeMaterial(0xd1ae58));compassMesh.position.set(.67,1.8,0);compassMesh.visible=false;playerGroup.add(compassMesh);playerGroup.userData.compass=compassMesh;
  playerGroup.userData.legs=legs;playerGroup.userData.arms=arms;playerGroup.userData.boots=bootMeshes;playerGroup.userData.lowerArms=lowerArms;
  playerGroup.position.set(0,terrainHeight(0,0),0);scene.add(playerGroup);
+}
+function addGuideNPC(){
+ const guide=new THREE.Group(),skin=makeMaterial(0x8f6247),jacket=makeMaterial(0x8a633d),cloth=makeMaterial(0x344d4c),dark=makeMaterial(0x252b28);
+ const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.36,.62,6,10),jacket);torso.position.y=1.38;guide.add(torso);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.25,16,12),skin);head.position.y=2.16;guide.add(head);
+ const hat=new THREE.Mesh(new THREE.CylinderGeometry(.31,.3,.13,12),cloth);hat.position.y=2.4;guide.add(hat);
+ const crown=new THREE.Mesh(new THREE.CylinderGeometry(.2,.23,.2,12),cloth);crown.position.y=2.53;guide.add(crown);
+ for(const side of [-1,1]){const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.12,.48,5,8),dark);leg.position.set(side*.17,.52,0);guide.add(leg);const arm=new THREE.Mesh(new THREE.CapsuleGeometry(.1,.48,5,8),jacket);arm.position.set(side*.43,1.38,0);arm.rotation.z=side*.12;guide.add(arm);}
+ const satchel=new THREE.Mesh(new THREE.BoxGeometry(.34,.42,.16),cloth);satchel.position.set(.38,1.25,.25);guide.add(satchel);
+ const marker=new THREE.Mesh(new THREE.OctahedronGeometry(.18),new THREE.MeshStandardMaterial({color:0xe6bd69,emissive:0x8c5e22,emissiveIntensity:.8}));marker.position.y=2.95;guide.add(marker);
+ guide.position.set(5,terrainHeight(5,4),4);guide.rotation.y=Math.PI*.72;guide.traverse(o=>{if(o.isMesh)o.castShadow=true;});scene.add(guide);
+ interactables.push({type:"guide",name:"Guia da ilha",x:5,z:6,object:guide});
 }
 function addPlane(){
  plane=new THREE.Group();
