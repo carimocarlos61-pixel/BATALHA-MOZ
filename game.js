@@ -113,7 +113,18 @@ function createLootModel(type){
  const color=palette[id]||0x71858a,main=makeMaterial(color),dark=makeMaterial(0x27363b),accent=({prop_arc:0x42e8ff,prop_nova:0xffb347,prop_pulse:0x7bff9b,prop_vortex:0xb58cff,prop_ion:0x65d9ff,prop_comet:0xffe27a,prop_spectra:0xff72c6,prop_zenith:0x9dffef,prop_echo:0xa6b7ff,prop_phantom:0xc6f0ff,prop_cyclone:0x8dffcf,prop_orbit:0x7fa8ff,prop_blaze:0xff875e,prop_titan:0xffd166,prop_aurora:0x75ffe1})[id]||(isTech?0x68dfd0:0x9ab9b0),glow=new THREE.MeshStandardMaterial({color:accent,emissive:accent,emissiveIntensity:id.startsWith("prop_")?1.35:.65,roughness:.35});
  if(isProtect){const shell=new THREE.Mesh(new THREE.BoxGeometry(.82,.48,.5),main);shell.position.y=.42;g.add(shell);const rim=new THREE.Mesh(new THREE.BoxGeometry(.9,.09,.56),dark);rim.position.y=.2;g.add(rim);const badge=new THREE.Mesh(new THREE.BoxGeometry(.22,.12,.03),glow);badge.position.set(0,.46,.27);g.add(badge);if(id==="protect_helmet_aegis"){shell.geometry.dispose();shell.geometry=new THREE.SphereGeometry(.43,12,8,0,Math.PI*2,0,Math.PI*.58);shell.position.y=.42;}}
  else if(isTech){const body=new THREE.Mesh(new THREE.BoxGeometry(.62,.42,.28),dark);body.position.y=.38;g.add(body);const screen=new THREE.Mesh(new THREE.BoxGeometry(.42,.25,.025),glow);screen.position.set(0,.42,.16);g.add(screen);const antenna=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,.34,6),main);antenna.position.set(.22,.75,0);g.add(antenna);const ring=new THREE.Mesh(new THREE.TorusGeometry(.16,.025,6,16),glow);ring.position.set(0,.42,.19);g.add(ring);}
- else {const core=new THREE.Mesh(new THREE.CapsuleGeometry(.14,.72,4,8),main);core.rotation.z=Math.PI/2;core.position.y=.38;g.add(core);const central=new THREE.Mesh(new THREE.BoxGeometry(.34,.24,.32),dark);central.position.y=.4;g.add(central);for(let j=-1;j<=1;j++){const node=new THREE.Mesh(new THREE.SphereGeometry(.095,8,6),glow);node.position.set(j*.25,.4,.2);g.add(node);}const fin=new THREE.Mesh(new THREE.BoxGeometry(.16,.34,.1),main);fin.position.set(-.42,.4,0);g.add(fin);}
+ else {
+  const core=new THREE.Mesh(new THREE.CapsuleGeometry(.16,.78,6,12),main);core.rotation.z=Math.PI/2;core.position.y=.43;g.add(core);
+  const spine=new THREE.Mesh(new THREE.BoxGeometry(.78,.12,.38),dark);spine.position.set(0,.43,0);g.add(spine);
+  const topRail=new THREE.Mesh(new THREE.BoxGeometry(.48,.075,.12),main);topRail.position.set(0,.64,0);g.add(topRail);
+  for(const x of [-.31,.31]){const coil=new THREE.Mesh(new THREE.TorusGeometry(.19,.035,8,20),glow);coil.rotation.y=Math.PI/2;coil.position.set(x,.43,0);g.add(coil);}
+  for(let j=-1;j<=1;j++){const node=new THREE.Mesh(new THREE.SphereGeometry(.075,12,8),glow);node.position.set(j*.22,.43,.225);g.add(node);}
+  const lens=new THREE.Mesh(new THREE.SphereGeometry(.105,12,8),glow);lens.scale.set(1,.72,.55);lens.position.set(0,.43,.29);g.add(lens);
+  const sideA=new THREE.Mesh(new THREE.BoxGeometry(.18,.22,.1),main);sideA.position.set(-.2,.24,0);g.add(sideA);
+  const sideB=sideA.clone();sideB.position.x=.2;g.add(sideB);
+  const fin=new THREE.Mesh(new THREE.BoxGeometry(.12,.34,.12),main);fin.position.set(-.52,.43,0);g.add(fin);
+  const badge=new THREE.Mesh(new THREE.TorusGeometry(.09,.018,6,16),glow);badge.position.set(.51,.43,0);badge.rotation.y=Math.PI/2;g.add(badge);
+ }
  } else if(type==="crate"){const body=new THREE.Mesh(new THREE.BoxGeometry(1.35,.9,1.05),makeMaterial(0x80603b));body.position.y=.52;g.add(body);for(let x=-1;x<=1;x+=2){const band=new THREE.Mesh(new THREE.BoxGeometry(.12,.96,1.1),makeMaterial(0xc2a36b));band.position.set(x*.43,.52,0);g.add(band);}const lid=new THREE.Mesh(new THREE.BoxGeometry(1.4,.13,1.1),makeMaterial(0x9a7548));lid.position.y=1.04;g.add(lid);const glow=new THREE.Mesh(new THREE.TorusGeometry(.86,.045,8,28),new THREE.MeshBasicMaterial({color:0x8bf0d1}));glow.rotation.x=Math.PI/2;glow.position.y=.12;g.add(glow);}
  return g;
 }
@@ -163,7 +174,7 @@ function activateCurrentGadget(){
  if(!started||inventoryOpen||dropPhase!=="landed")return;
  const item=quickSlots[activeQuickIndex],d=item&&itemDefs[item.type];
  if(!item){triggerScan();return;}
- if(d?.group==="technology"||item.type==="scanner"){triggerScan();return;}
+ if(d?.group==="technology"||item.type==="scanner"||item.type.startsWith("prop_")){triggerScan();return;}
  showToast(d?.group==="protection"?"PROTECÇÃO EQUIPADA • ACTIVA NO PERSONAGEM":"ACESSÓRIO VISUAL EQUIPADO");
 }
 function setFocusMode(active){
